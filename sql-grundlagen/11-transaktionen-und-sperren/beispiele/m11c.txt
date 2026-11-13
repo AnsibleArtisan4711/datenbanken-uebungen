@@ -1,0 +1,19 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 6: Rückbau
+SELECT (SELECT COUNT(*) FROM mitarbeiter) AS mitarbeiter, (SELECT COUNT(*) FROM mitarbeiter_sicherung) AS sicherung;
+ mitarbeiter | sicherung 
+-------------+-----------
+           7 |         6
+(1 row)
+
+DROP TABLE mitarbeiter_sicherung;
+DROP TABLE
+\dt
+           List of relations
+ Schema |    Name     | Type  |  Owner  
+--------+-------------+-------+---------
+ public | abteilung   | table | labuser
+ public | mitarbeiter | table | labuser
+ public | projekt     | table | labuser
+(3 rows)
+

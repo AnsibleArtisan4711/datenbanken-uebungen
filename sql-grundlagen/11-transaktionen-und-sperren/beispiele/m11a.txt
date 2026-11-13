@@ -1,0 +1,95 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Sicherung
+CREATE TABLE mitarbeiter_sicherung AS SELECT * FROM mitarbeiter;
+SELECT 6
+SELECT (SELECT COUNT(*) FROM mitarbeiter) AS original, (SELECT COUNT(*) FROM mitarbeiter_sicherung) AS sicherung;
+ original | sicherung 
+----------+-----------
+        6 |         6
+(1 row)
+
+\d mitarbeiter_sicherung
+                    Table "public.mitarbeiter_sicherung"
+      Column       |          Type          | Collation | Nullable | Default 
+-------------------+------------------------+-----------+----------+---------
+ mitarbeiter_id    | integer                |           |          | 
+ vorname           | character varying(50)  |           |          | 
+ nachname          | character varying(50)  |           |          | 
+ email             | character varying(100) |           |          | 
+ gehalt            | numeric(10,2)          |           |          | 
+ abteilung_id      | integer                |           |          | 
+ einstellungsdatum | date                   |           |          | 
+
+=== Aufgabe 2: Rollback testen
+BEGIN;
+BEGIN
+DELETE FROM mitarbeiter;
+DELETE 6
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     0
+(1 row)
+
+ROLLBACK;
+ROLLBACK
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     6
+(1 row)
+
+=== Aufgabe 3: Commit
+BEGIN;
+BEGIN
+INSERT INTO mitarbeiter (vorname, nachname, email, gehalt, abteilung_id) VALUES ('Tina', 'Wagner', 'tina.wagner@example.com', 3400.00, 3) RETURNING mitarbeiter_id;
+ mitarbeiter_id 
+----------------
+         100008
+(1 row)
+
+INSERT 0 1
+COMMIT;
+COMMIT
+SELECT mitarbeiter_id, nachname FROM mitarbeiter ORDER BY mitarbeiter_id;
+ mitarbeiter_id | nachname 
+----------------+----------
+              1 | Müller
+              2 | Maier
+              3 | Huber
+              4 | Berger
+              5 | Steiner
+              7 | Neumann
+         100008 | Wagner
+(7 rows)
+
+=== Ergänzung: Fehler in einer Transaktion
+BEGIN;
+BEGIN
+SELECT 1/0;
+psql:skript.sql:18: ERROR:  division by zero
+SELECT COUNT(*) FROM mitarbeiter;
+psql:skript.sql:19: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ROLLBACK;
+ROLLBACK
+=== Ergänzung: Wiederherstellung aus der Sicherung (Probe, in Transaktion, danach zurückgerollt)
+BEGIN;
+BEGIN
+DELETE FROM mitarbeiter;
+DELETE 7
+INSERT INTO mitarbeiter OVERRIDING SYSTEM VALUE SELECT * FROM mitarbeiter_sicherung;
+INSERT 0 6
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     6
+(1 row)
+
+ROLLBACK;
+ROLLBACK
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     7
+(1 row)
+

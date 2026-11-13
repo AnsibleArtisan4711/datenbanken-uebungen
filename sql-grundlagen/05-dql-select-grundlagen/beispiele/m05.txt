@@ -1,0 +1,87 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Spalten und Aliasse
+SELECT vorname, nachname, einstellungsdatum AS "Eintritt" FROM mitarbeiter;
+ vorname | nachname |  Eintritt  
+---------+----------+------------
+ Peter   | Maier    | 2021-09-15
+ Karl    | Huber    | 2023-01-10
+ Eva     | Berger   | 2020-06-01
+ Lukas   | Steiner  | 2022-11-01
+ Anna    | Müller   | 2019-03-01
+(5 rows)
+
+=== Aufgabe 2: Filtern
+SELECT vorname, nachname, abteilung_id FROM mitarbeiter WHERE abteilung_id = 2 AND nachname LIKE 'M%';
+ vorname | nachname | abteilung_id 
+---------+----------+--------------
+ Peter   | Maier    |            2
+ Anna    | Müller   |            2
+(2 rows)
+
+SELECT vorname, nachname, gehalt, abteilung_id FROM mitarbeiter WHERE abteilung_id = 2 AND nachname LIKE 'M%' OR gehalt > 4000;
+ vorname | nachname | gehalt  | abteilung_id 
+---------+----------+---------+--------------
+ Peter   | Maier    | 4200.00 |            2
+ Lukas   | Steiner  | 4500.00 |            3
+ Anna    | Müller   | 3990.00 |            2
+(3 rows)
+
+SELECT vorname, nachname, gehalt, abteilung_id FROM mitarbeiter WHERE (abteilung_id = 2 AND nachname LIKE 'M%' OR gehalt > 4000) AND NOT abteilung_id = 3;
+ vorname | nachname | gehalt  | abteilung_id 
+---------+----------+---------+--------------
+ Peter   | Maier    | 4200.00 |            2
+ Anna    | Müller   | 3990.00 |            2
+(2 rows)
+
+=== Ergänzung: LIKE unterscheidet Groß- und Kleinschreibung, ILIKE nicht
+SELECT nachname FROM mitarbeiter WHERE nachname LIKE 'm%';
+ nachname 
+----------
+(0 rows)
+
+SELECT nachname FROM mitarbeiter WHERE nachname ILIKE 'm%';
+ nachname 
+----------
+ Maier
+ Müller
+(2 rows)
+
+=== Ergänzung: Reihenfolge der Verarbeitung (Alias im WHERE)
+SELECT nachname, gehalt * 12 AS jahresgehalt FROM mitarbeiter WHERE jahresgehalt > 45000;
+psql:skript.sql:11: ERROR:  column "jahresgehalt" does not exist
+LINE 1: ...ehalt * 12 AS jahresgehalt FROM mitarbeiter WHERE jahresgeha...
+                                                             ^
+SELECT nachname, gehalt * 12 AS jahresgehalt FROM mitarbeiter WHERE gehalt * 12 > 45000 ORDER BY jahresgehalt DESC;
+ nachname | jahresgehalt 
+----------+--------------
+ Steiner  |     54000.00
+ Maier    |     50400.00
+ Müller   |     47880.00
+(3 rows)
+
+=== Aufgabe 3: Sortieren und Paginieren
+SELECT nachname, vorname FROM mitarbeiter ORDER BY nachname LIMIT 3;
+ nachname | vorname 
+----------+---------
+ Berger   | Eva
+ Huber    | Karl
+ Maier    | Peter
+(3 rows)
+
+SELECT nachname, vorname FROM mitarbeiter ORDER BY nachname LIMIT 3 OFFSET 3;
+ nachname | vorname 
+----------+---------
+ Müller   | Anna
+ Steiner  | Lukas
+(2 rows)
+
+SELECT nachname, gehalt FROM mitarbeiter ORDER BY gehalt DESC;
+ nachname | gehalt  
+----------+---------
+ Steiner  | 4500.00
+ Maier    | 4200.00
+ Müller   | 3990.00
+ Huber    | 3600.00
+ Berger   | 3100.00
+(5 rows)
+

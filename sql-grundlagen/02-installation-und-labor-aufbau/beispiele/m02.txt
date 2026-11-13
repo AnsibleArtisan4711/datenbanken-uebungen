@@ -1,0 +1,100 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Version prüfen (Installation und Treiber-Download nicht nachgestellt)
+$ sudo -u postgres psql -c 'SELECT version();'
+                                                                 version                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+(1 row)
+
+=== Aufgabe 2: Adresse und Erreichbarkeit
+$ ip -br a
+lo               UNKNOWN        127.0.0.1/8 
+eth0@if5         UP             192.168.100.10/24 
+$ (Client) ping -c 2 192.168.100.10 | tail -3
+--- 192.168.100.10 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1026ms
+rtt min/avg/max/mdev = 0.037/0.043/0.050/0.006 ms
+
+=== Aufgabe 3: Netzwerkzugriff konfigurieren
+$ ls /etc/postgresql
+16
+$ ss -tln
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+LISTEN 0      200        127.0.0.1:5432      0.0.0.0:*          
+$ grep -n 'listen_addresses' /etc/postgresql/16/main/postgresql.conf
+60:#listen_addresses = 'localhost'		# what IP address(es) to listen on;
+$ sed -i "s/^#listen_addresses = 'localhost'.*/listen_addresses = '192.168.100.10'/" /etc/postgresql/16/main/postgresql.conf
+$ grep -n '^listen_addresses' /etc/postgresql/16/main/postgresql.conf
+60:listen_addresses = '192.168.100.10'
+$ echo 'host    firma           labuser         192.168.100.0/24        scram-sha-256' >> /etc/postgresql/16/main/pg_hba.conf
+$ tail -n 2 /etc/postgresql/16/main/pg_hba.conf
+host    replication     all             ::1/128                 scram-sha-256
+host    firma           labuser         192.168.100.0/24        scram-sha-256
+$ pg_ctlcluster 16 main restart
+$ ss -tln
+State  Recv-Q Send-Q  Local Address:Port Peer Address:PortProcess
+LISTEN 0      200    192.168.100.10:5432      0.0.0.0:*          
+$ sudo -u postgres psql -c 'SHOW listen_addresses;'
+ listen_addresses 
+------------------
+ 192.168.100.10
+(1 row)
+
+--- Ergänzung: Zugriff über localhost nach der Änderung
+$ psql -h 127.0.0.1 -U postgres -c 'SELECT 1'
+psql: error: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+=== Aufgabe 4: Datenbanknutzer und Datenbank
+$ sudo -u postgres psql    (\password labuser durch ALTER ROLE ... PASSWORD mit dem Laborwert ersetzt)
+CREATE ROLE labuser LOGIN;
+CREATE ROLE
+ALTER ROLE labuser PASSWORD 'LabKennwort1';
+ALTER ROLE
+CREATE DATABASE firma OWNER labuser;
+CREATE DATABASE
+SELECT rolname, left(rolpassword, 14) AS passwort_anfang FROM pg_authid WHERE rolname = 'labuser';
+ rolname | passwort_anfang 
+---------+-----------------
+ labuser | SCRAM-SHA-256$
+(1 row)
+
+\l firma
+                                                   List of databases
+ Name  |  Owner  | Encoding | Locale Provider |   Collate   |    Ctype    | ICU Locale | ICU Rules | Access privileges 
+-------+---------+----------+-----------------+-------------+-------------+------------+-----------+-------------------
+ firma | labuser | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+(1 row)
+
+--- Ergänzung: ohne OWNER scheitert CREATE TABLE im Schema public (Test mit SET ROLE in einer zweiten Datenbank)
+CREATE DATABASE firma_ohne_owner;
+CREATE DATABASE
+\c firma_ohne_owner
+You are now connected to database "firma_ohne_owner" as user "postgres".
+SET ROLE labuser;
+SET
+CREATE TABLE test (x INTEGER);
+ERROR:  permission denied for schema public
+LINE 1: CREATE TABLE test (x INTEGER);
+                     ^
+RESET ROLE;
+RESET
+\c postgres
+You are now connected to database "postgres" as user "postgres".
+DROP DATABASE firma_ohne_owner;
+DROP DATABASE
+
+=== Aufgabe 5: Verbindungsaufbau (psql statt DBeaver)
+$ (Client) psql -h 192.168.100.10 -p 5432 -U labuser -d firma -c 'SELECT version();'   (Kennwort über PGPASSWORD, Laborwert)
+                                                                 version                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+(1 row)
+
+--- Ergänzung: andere Datenbank und falsches Kennwort
+$ (Client) psql -h 192.168.100.10 -U labuser -d postgres -c 'SELECT 1'
+psql: error: connection to server at "192.168.100.10", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "postgres", SSL encryption
+connection to server at "192.168.100.10", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "postgres", no encryption
+$ (Client) psql -h 192.168.100.10 -U labuser -d firma -c 'SELECT 1'    (falsches Kennwort)
+psql: error: connection to server at "192.168.100.10", port 5432 failed: FATAL:  password authentication failed for user "labuser"
+connection to server at "192.168.100.10", port 5432 failed: FATAL:  password authentication failed for user "labuser"

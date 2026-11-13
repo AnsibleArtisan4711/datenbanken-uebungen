@@ -1,0 +1,190 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1 und 2: Struktur anlegen (Skript 01_struktur.sql)
+\i 01_struktur.sql
+-- 01_struktur.sql: Tabellen der Datenbank firma (Modul 3)
+-- Aufgabe 1: Tabellen anlegen
+CREATE TABLE abteilung (
+    abteilung_id  INTEGER GENERATED ALWAYS AS IDENTITY,
+    name          VARCHAR(50) NOT NULL,
+    standort      VARCHAR(50)
+);
+CREATE TABLE
+CREATE TABLE mitarbeiter (
+    mitarbeiter_id INTEGER GENERATED ALWAYS AS IDENTITY,
+    vorname        VARCHAR(50) NOT NULL,
+    nachname       VARCHAR(50) NOT NULL,
+    email          VARCHAR(100),
+    gehalt         NUMERIC(10,2),
+    abteilung_id   INTEGER
+);
+CREATE TABLE
+CREATE TABLE projekt (
+    projekt_id     INTEGER GENERATED ALWAYS AS IDENTITY,
+    bezeichnung    VARCHAR(100) NOT NULL,
+    startdatum     DATE,
+    abteilung_id   INTEGER
+);
+CREATE TABLE
+-- Aufgabe 2: Constraints
+ALTER TABLE abteilung   ADD CONSTRAINT pk_abteilung   PRIMARY KEY (abteilung_id);
+ALTER TABLE
+ALTER TABLE mitarbeiter ADD CONSTRAINT pk_mitarbeiter PRIMARY KEY (mitarbeiter_id);
+ALTER TABLE
+ALTER TABLE projekt     ADD CONSTRAINT pk_projekt     PRIMARY KEY (projekt_id);
+ALTER TABLE
+ALTER TABLE mitarbeiter ADD CONSTRAINT fk_mitarbeiter_abteilung
+    FOREIGN KEY (abteilung_id) REFERENCES abteilung (abteilung_id);
+ALTER TABLE
+ALTER TABLE projekt     ADD CONSTRAINT fk_projekt_abteilung
+    FOREIGN KEY (abteilung_id) REFERENCES abteilung (abteilung_id);
+ALTER TABLE
+ALTER TABLE mitarbeiter ADD CONSTRAINT uq_mitarbeiter_email UNIQUE (email);
+ALTER TABLE
+-- Aufgabe 3: Spalte ergänzen
+ALTER TABLE mitarbeiter ADD COLUMN einstellungsdatum DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE
+=== Prüfen
+\dt
+           List of relations
+ Schema |    Name     | Type  |  Owner  
+--------+-------------+-------+---------
+ public | abteilung   | table | labuser
+ public | mitarbeiter | table | labuser
+ public | projekt     | table | labuser
+(3 rows)
+
+\d mitarbeiter
+                                    Table "public.mitarbeiter"
+      Column       |          Type          | Collation | Nullable |           Default            
+-------------------+------------------------+-----------+----------+------------------------------
+ mitarbeiter_id    | integer                |           | not null | generated always as identity
+ vorname           | character varying(50)  |           | not null | 
+ nachname          | character varying(50)  |           | not null | 
+ email             | character varying(100) |           |          | 
+ gehalt            | numeric(10,2)          |           |          | 
+ abteilung_id      | integer                |           |          | 
+ einstellungsdatum | date                   |           | not null | CURRENT_DATE
+Indexes:
+    "pk_mitarbeiter" PRIMARY KEY, btree (mitarbeiter_id)
+    "uq_mitarbeiter_email" UNIQUE CONSTRAINT, btree (email)
+Foreign-key constraints:
+    "fk_mitarbeiter_abteilung" FOREIGN KEY (abteilung_id) REFERENCES abteilung(abteilung_id)
+
+\d abteilung
+                                  Table "public.abteilung"
+    Column    |         Type          | Collation | Nullable |           Default            
+--------------+-----------------------+-----------+----------+------------------------------
+ abteilung_id | integer               |           | not null | generated always as identity
+ name         | character varying(50) |           | not null | 
+ standort     | character varying(50) |           |          | 
+Indexes:
+    "pk_abteilung" PRIMARY KEY, btree (abteilung_id)
+Referenced by:
+    TABLE "mitarbeiter" CONSTRAINT "fk_mitarbeiter_abteilung" FOREIGN KEY (abteilung_id) REFERENCES abteilung(abteilung_id)
+    TABLE "projekt" CONSTRAINT "fk_projekt_abteilung" FOREIGN KEY (abteilung_id) REFERENCES abteilung(abteilung_id)
+
+\d projekt
+                                   Table "public.projekt"
+    Column    |          Type          | Collation | Nullable |           Default            
+--------------+------------------------+-----------+----------+------------------------------
+ projekt_id   | integer                |           | not null | generated always as identity
+ bezeichnung  | character varying(100) |           | not null | 
+ startdatum   | date                   |           |          | 
+ abteilung_id | integer                |           |          | 
+Indexes:
+    "pk_projekt" PRIMARY KEY, btree (projekt_id)
+Foreign-key constraints:
+    "fk_projekt_abteilung" FOREIGN KEY (abteilung_id) REFERENCES abteilung(abteilung_id)
+
+=== Aufgabe 4: DROP TABLE
+CREATE TABLE temp_test (x INTEGER);
+CREATE TABLE
+\dt
+           List of relations
+ Schema |    Name     | Type  |  Owner  
+--------+-------------+-------+---------
+ public | abteilung   | table | labuser
+ public | mitarbeiter | table | labuser
+ public | projekt     | table | labuser
+ public | temp_test   | table | labuser
+(4 rows)
+
+DROP TABLE temp_test;
+DROP TABLE
+\dt
+           List of relations
+ Schema |    Name     | Type  |  Owner  
+--------+-------------+-------+---------
+ public | abteilung   | table | labuser
+ public | mitarbeiter | table | labuser
+ public | projekt     | table | labuser
+(3 rows)
+
+=== Ergänzung: Fehlerfälle der Constraints (an temporären Hilfstabellen, damit die Identity-Zähler der Kurstabellen unberührt bleiben)
+CREATE TEMP TABLE t_abt (id INTEGER PRIMARY KEY);
+CREATE TABLE
+CREATE TEMP TABLE t_mit (
+    id       INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nachname VARCHAR(50) NOT NULL,
+    email    VARCHAR(100) UNIQUE,
+    abt      INTEGER REFERENCES t_abt (id)
+);
+CREATE TABLE
+INSERT INTO t_abt VALUES (1);
+INSERT 0 1
+INSERT INTO t_mit (nachname, abt) VALUES ('Eins', 99);
+psql:skript.sql:22: ERROR:  insert or update on table "t_mit" violates foreign key constraint "t_mit_abt_fkey"
+DETAIL:  Key (abt)=(99) is not present in table "t_abt".
+INSERT INTO t_mit (email) VALUES ('x@example.com');
+psql:skript.sql:23: ERROR:  null value in column "nachname" of relation "t_mit" violates not-null constraint
+DETAIL:  Failing row contains (2, null, x@example.com, null).
+INSERT INTO t_mit (id, nachname) VALUES (1, 'Zwei');
+psql:skript.sql:24: ERROR:  cannot insert a non-DEFAULT value into column "id"
+DETAIL:  Column "id" is an identity column defined as GENERATED ALWAYS.
+HINT:  Use OVERRIDING SYSTEM VALUE to override.
+INSERT INTO t_mit (nachname, email) VALUES ('Drei', 'a@example.com');
+INSERT 0 1
+INSERT INTO t_mit (nachname, email) VALUES ('Vier', 'a@example.com');
+psql:skript.sql:26: ERROR:  duplicate key value violates unique constraint "t_mit_email_key"
+DETAIL:  Key (email)=(a@example.com) already exists.
+INSERT INTO t_mit (nachname) VALUES ('Fuenf') RETURNING id;
+ id 
+----
+  5
+(1 row)
+
+INSERT 0 1
+=== Ergänzung: UNIQUE erlaubt mehrere NULL-Werte
+INSERT INTO t_mit (nachname, email) VALUES ('Sechs', NULL), ('Sieben', NULL);
+INSERT 0 2
+SELECT id, nachname, email FROM t_mit WHERE email IS NULL ORDER BY id;
+ id | nachname | email 
+----+----------+-------
+  5 | Fuenf    | 
+  6 | Sechs    | 
+  7 | Sieben   | 
+(3 rows)
+
+=== Ergänzung: Lücken in Identity-Werten
+SELECT id, nachname FROM t_mit ORDER BY id;
+ id | nachname 
+----+----------
+  3 | Drei
+  5 | Fuenf
+  6 | Sechs
+  7 | Sieben
+(4 rows)
+
+=== Ergänzung: CHAR gegen VARCHAR
+SELECT 'ab'::char(5) AS c, 'ab'::varchar(5) AS v, octet_length('ab'::char(5)) AS bytes_c, octet_length('ab'::varchar(5)) AS bytes_v, length('ab'::char(5)) AS len_c;
+   c   | v  | bytes_c | bytes_v | len_c 
+-------+----+---------+---------+-------
+ ab    | ab |       5 |       2 |     2
+(1 row)
+
+SELECT 'ab'::char(5) = 'ab   '::char(5) AS gleich_char, 'ab'::varchar(5) = 'ab   '::varchar(5) AS gleich_varchar;
+ gleich_char | gleich_varchar 
+-------------+----------------
+ t           | f
+(1 row)
+

@@ -1,0 +1,76 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Subquery im WHERE und skalare Unterabfrage im SELECT
+SELECT nachname, gehalt, (SELECT AVG(gehalt) FROM mitarbeiter) AS durchschnitt FROM mitarbeiter WHERE gehalt > (SELECT AVG(gehalt) FROM mitarbeiter) ORDER BY gehalt DESC;
+ nachname | gehalt  |     durchschnitt      
+----------+---------+-----------------------
+ Steiner  | 4500.00 | 3781.6666666666666667
+ Maier    | 4200.00 | 3781.6666666666666667
+ Müller   | 3990.00 | 3781.6666666666666667
+(3 rows)
+
+=== Aufgabe 2: korrelierte Unterabfrage
+SELECT m.abteilung_id, m.nachname, m.gehalt FROM mitarbeiter m WHERE m.gehalt = (SELECT MAX(x.gehalt) FROM mitarbeiter x WHERE x.abteilung_id = m.abteilung_id) ORDER BY m.abteilung_id;
+ abteilung_id | nachname | gehalt  
+--------------+----------+---------
+            1 | Berger   | 3100.00
+            2 | Maier    | 4200.00
+            3 | Steiner  | 4500.00
+(3 rows)
+
+=== Aufgabe 3: Unterabfrage im FROM
+SELECT a.name, COALESCE(t.anzahl, 0) AS anzahl FROM abteilung a LEFT JOIN (SELECT abteilung_id, COUNT(*) AS anzahl FROM mitarbeiter GROUP BY abteilung_id) t ON t.abteilung_id = a.abteilung_id ORDER BY a.abteilung_id;
+    name    | anzahl 
+------------+--------
+ Verwaltung |      1
+ Technik    |      3
+ Vertrieb   |      1
+ Archiv     |      0
+(4 rows)
+
+SELECT a.name, t.anzahl FROM abteilung a LEFT JOIN (SELECT abteilung_id, COUNT(*) AS anzahl FROM mitarbeiter GROUP BY abteilung_id) t ON t.abteilung_id = a.abteilung_id WHERE COALESCE(t.anzahl, 0) >= 1 ORDER BY a.abteilung_id;
+    name    | anzahl 
+------------+--------
+ Verwaltung |      1
+ Technik    |      3
+ Vertrieb   |      1
+(3 rows)
+
+=== Aufgabe 4: CTE
+WITH durchschnitt AS (SELECT AVG(gehalt) AS avg_gehalt FROM mitarbeiter)
+SELECT m.nachname, m.gehalt, d.avg_gehalt AS durchschnitt FROM mitarbeiter m CROSS JOIN durchschnitt d WHERE m.gehalt > d.avg_gehalt ORDER BY m.gehalt DESC;
+ nachname | gehalt  |     durchschnitt      
+----------+---------+-----------------------
+ Steiner  | 4500.00 | 3781.6666666666666667
+ Maier    | 4200.00 | 3781.6666666666666667
+ Müller   | 3990.00 | 3781.6666666666666667
+(3 rows)
+
+=== Ergänzung: Ergebnisvergleich Aufgabe 1 gegen Aufgabe 4 (leer = gleich)
+(SELECT nachname FROM mitarbeiter WHERE gehalt > (SELECT AVG(gehalt) FROM mitarbeiter))
+EXCEPT
+(WITH durchschnitt AS (SELECT AVG(gehalt) AS avg_gehalt FROM mitarbeiter) SELECT m.nachname FROM mitarbeiter m CROSS JOIN durchschnitt d WHERE m.gehalt > d.avg_gehalt);
+ nachname 
+----------
+(0 rows)
+
+=== Ergänzung: Skalare Unterabfrage mit mehr als einer Zeile
+SELECT nachname, (SELECT gehalt FROM mitarbeiter WHERE abteilung_id = 2) FROM mitarbeiter;
+psql:skript.sql:16: ERROR:  more than one row returned by a subquery used as an expression
+=== Ergänzung: NOT IN und NULL
+SELECT name FROM abteilung WHERE abteilung_id NOT IN (SELECT abteilung_id FROM mitarbeiter);
+ name 
+------
+(0 rows)
+
+SELECT name FROM abteilung WHERE abteilung_id NOT IN (SELECT abteilung_id FROM mitarbeiter WHERE abteilung_id IS NOT NULL);
+  name  
+--------
+ Archiv
+(1 row)
+
+SELECT name FROM abteilung a WHERE NOT EXISTS (SELECT 1 FROM mitarbeiter m WHERE m.abteilung_id = a.abteilung_id);
+  name  
+--------
+ Archiv
+(1 row)
+

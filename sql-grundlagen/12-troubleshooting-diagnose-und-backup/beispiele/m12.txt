@@ -1,0 +1,180 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Backup erstellen
+$ sudo -u postgres pg_dump firma > ~/firma_backup.sql
+$ sudo -u postgres pg_dump -Fc firma > ~/firma_backup.dump
+$ ls -l ~/firma_backup.sql ~/firma_backup.dump
+-rw-r--r-- 1 root root 15824 Nov 13 05:33 /root/firma_backup.dump
+-rw-r--r-- 1 root root  6489 Nov 13 05:33 /root/firma_backup.sql
+$ grep -n 'CREATE TABLE\|^COPY ' ~/firma_backup.sql
+29:CREATE TABLE public.abteilung (
+56:CREATE TABLE public.mitarbeiter (
+102:CREATE TABLE public.projekt (
+145:COPY public.abteilung (abteilung_id, name, standort) FROM stdin;
+157:COPY public.mitarbeiter (mitarbeiter_id, vorname, nachname, email, gehalt, abteilung_id, einstellungsdatum) FROM stdin;
+172:COPY public.projekt (projekt_id, bezeichnung, startdatum, abteilung_id) FROM stdin;
+$ sed -n '/^COPY public.abteilung/,/^\\\./p' ~/firma_backup.sql
+COPY public.abteilung (abteilung_id, name, standort) FROM stdin;
+1	Verwaltung	Wien
+2	Technik	Linz
+3	Vertrieb	Graz
+4	Archiv	Wien
+\.
+
+=== Aufgabe 2: Restore-Test in eine neue Datenbank
+$ sudo -u postgres createdb -O labuser firma_restore
+$ sudo -u postgres psql -d firma_restore -v ON_ERROR_STOP=1 < ~/firma_backup.sql | tail -5
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REFRESH MATERIALIZED VIEW
+$ sudo -u postgres psql -d firma -c 'SELECT COUNT(*) FROM mitarbeiter;'
+ count 
+-------
+     7
+(1 row)
+
+$ sudo -u postgres psql -d firma_restore -c 'SELECT COUNT(*) FROM mitarbeiter;'
+ count 
+-------
+     7
+(1 row)
+
+--- Ergänzung: Restore in die bestehende Datenbank firma (Fehler zählen)
+$ sudo -u postgres psql -d firma < ~/firma_backup.sql 2>&1 | grep -c ERROR
+17
+      1 constraint "…" for relation "mitarbeiter" already exists
+      1 constraint "…" for relation "projekt" already exists
+      3 duplicate key value violates unique constraint "…"
+      3 multiple primary keys for table "…" are not allowed
+      9 relation "…" already exists
+--- Ergänzung: Daten in firma nach dem fehlerhaften Restore (unverändert?)
+$ sudo -u postgres psql -d firma -c 'SELECT COUNT(*) FROM mitarbeiter;'
+ count 
+-------
+     7
+(1 row)
+
+
+=== Aufgabe 3: Restore aus dem Custom-Format
+$ pg_restore -l ~/firma_backup.dump | head -40
+;
+; Archive created at 2026-11-13 05:33:48 CET
+;     dbname: firma
+;     TOC Entries: 25
+;     Compression: gzip
+;     Dump Version: 1.15-0
+;     Format: CUSTOM
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
+;     Dumped by pg_dump version: 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
+;
+;
+; Selected TOC Entries:
+;
+218; 1259 16885 TABLE public abteilung labuser
+217; 1259 16884 SEQUENCE public abteilung_abteilung_id_seq labuser
+220; 1259 16889 TABLE public mitarbeiter labuser
+219; 1259 16888 SEQUENCE public mitarbeiter_mitarbeiter_id_seq labuser
+223; 1259 16942 MATERIALIZED VIEW public mv_abteilung_statistik labuser
+222; 1259 16893 TABLE public projekt labuser
+221; 1259 16892 SEQUENCE public projekt_projekt_id_seq labuser
+224; 1259 16949 VIEW public vw_mitarbeiterliste labuser
+3426; 0 16885 TABLE DATA public abteilung labuser
+3428; 0 16889 TABLE DATA public mitarbeiter labuser
+3430; 0 16893 TABLE DATA public projekt labuser
+3438; 0 0 SEQUENCE SET public abteilung_abteilung_id_seq labuser
+3439; 0 0 SEQUENCE SET public mitarbeiter_mitarbeiter_id_seq labuser
+3440; 0 0 SEQUENCE SET public projekt_projekt_id_seq labuser
+3271; 2606 16897 CONSTRAINT public abteilung pk_abteilung labuser
+3273; 2606 16899 CONSTRAINT public mitarbeiter pk_mitarbeiter labuser
+3277; 2606 16901 CONSTRAINT public projekt pk_projekt labuser
+3275; 2606 16913 CONSTRAINT public mitarbeiter uq_mitarbeiter_email labuser
+3278; 2606 16902 FK CONSTRAINT public mitarbeiter fk_mitarbeiter_abteilung labuser
+3279; 2606 16907 FK CONSTRAINT public projekt fk_projekt_abteilung labuser
+3431; 0 16942 MATERIALIZED VIEW DATA public mv_abteilung_statistik labuser
+$ sudo -u postgres createdb -O labuser firma_restore2
+$ sudo -u postgres pg_restore -d firma_restore2 --exit-on-error < ~/firma_backup.dump
+$ sudo -u postgres psql -d firma_restore2 -c 'SELECT COUNT(*) FROM mitarbeiter;'
+ count 
+-------
+     7
+(1 row)
+
+$ sudo -u postgres dropdb firma_restore
+$ sudo -u postgres psql -l | grep firma
+ firma          | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+ firma_restore2 | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+$ sudo -u postgres createdb -O labuser firma_restore
+$ sudo -u postgres psql -d firma_restore -v ON_ERROR_STOP=1 < ~/firma_backup.sql | tail -3
+ALTER TABLE
+ALTER TABLE
+REFRESH MATERIALIZED VIEW
+$ sudo -u postgres psql -d firma -tc 'SELECT COUNT(*) FROM mitarbeiter;'
+     7
+
+$ sudo -u postgres psql -d firma_restore -tc 'SELECT COUNT(*) FROM mitarbeiter;'
+     7
+
+$ sudo -u postgres psql -d firma_restore2 -tc 'SELECT COUNT(*) FROM mitarbeiter;'
+     7
+
+--- Ergänzung: Eigentümer und Identity-Zähler nach dem Restore
+$ sudo -u postgres psql -d firma_restore -c '\dt' -c 'INSERT INTO mitarbeiter (vorname, nachname) VALUES ($$Rest$$, $$Test$$) RETURNING mitarbeiter_id;'
+           List of relations
+ Schema |    Name     | Type  |  Owner  
+--------+-------------+-------+---------
+ public | abteilung   | table | labuser
+ public | mitarbeiter | table | labuser
+ public | projekt     | table | labuser
+(3 rows)
+
+ mitarbeiter_id 
+----------------
+         100009
+(1 row)
+
+INSERT 0 1
+
+=== Aufgabe 4: Log-Analyse (Anmeldung mit falschem Kennwort vom Client aus)
+$ ls /var/log/postgresql/
+postgresql-16-main.log
+$ tail -n 4 /var/log/postgresql/postgresql-16-main.log
+2026-11-13 05:33:49.331 CET [1904] labuser@firma FATAL:  password authentication failed for user "labuser"
+2026-11-13 05:33:49.331 CET [1904] labuser@firma DETAIL:  Connection matched file "/etc/postgresql/16/main/pg_hba.conf" line 133: "host    firma           labuser         192.168.100.0/24        scram-sha-256"
+2026-11-13 05:33:49.337 CET [1905] labuser@firma FATAL:  password authentication failed for user "labuser"
+2026-11-13 05:33:49.337 CET [1905] labuser@firma DETAIL:  Connection matched file "/etc/postgresql/16/main/pg_hba.conf" line 133: "host    firma           labuser         192.168.100.0/24        scram-sha-256"
+
+=== Aufgabe 5: Fehlersuche pg_hba.conf
+$ cp /etc/postgresql/16/main/pg_hba.conf /etc/postgresql/16/main/pg_hba.conf.bak
+$ sed -i 's#192.168.100.0/24#192.168.101.0/24#' /etc/postgresql/16/main/pg_hba.conf
+$ grep -n '^host *firma' /etc/postgresql/16/main/pg_hba.conf
+133:host    firma           labuser         192.168.101.0/24        scram-sha-256
+$ pg_ctlcluster 16 main reload
+$ (Client) psql -h 192.168.100.10 -U labuser -d firma -c 'SELECT 1'
+psql: error: connection to server at "192.168.100.10", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "firma", SSL encryption
+connection to server at "192.168.100.10", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "firma", no encryption
+$ tail -n 3 /var/log/postgresql/postgresql-16-main.log
+2026-11-13 05:33:49.378 CET [1205] LOG:  received SIGHUP, reloading configuration files
+2026-11-13 05:33:50.411 CET [1915] labuser@firma FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "firma", SSL encryption
+2026-11-13 05:33:50.412 CET [1916] labuser@firma FATAL:  no pg_hba.conf entry for host "192.168.100.20", user "labuser", database "firma", no encryption
+$ cp /etc/postgresql/16/main/pg_hba.conf.bak /etc/postgresql/16/main/pg_hba.conf
+$ pg_ctlcluster 16 main reload
+$ (Client) psql -h 192.168.100.10 -U labuser -d firma -c 'SELECT 1'
+ ?column? 
+----------
+        1
+(1 row)
+
+$ rm /etc/postgresql/16/main/pg_hba.conf.bak
+
+=== Aufgabe 6: Rückbau
+$ sudo -u postgres psql -l | grep firma
+ firma          | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+ firma_restore  | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+ firma_restore2 | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 
+$ sudo -u postgres dropdb firma_restore
+$ sudo -u postgres dropdb firma_restore2
+$ sudo -u postgres psql -l | grep firma
+ firma     | labuser  | UTF8     | libc            | de_AT.UTF-8 | de_AT.UTF-8 |            |           | 

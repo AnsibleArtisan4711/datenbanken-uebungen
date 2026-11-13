@@ -1,0 +1,21 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Ergänzung: Kosten eines Index beim Einfügen (temporäre Tabellen, 300000 Zeilen)
+\timing on
+Timing is on.
+CREATE TEMP TABLE t_ohne (nachname VARCHAR(50));
+CREATE TABLE
+Time: 1.394 ms
+INSERT INTO t_ohne SELECT 'Name' || (g % 5000) FROM generate_series(1, 300000) g;
+INSERT 0 300000
+Time: 102.617 ms
+CREATE TEMP TABLE t_mit (nachname VARCHAR(50));
+CREATE TABLE
+Time: 1.269 ms
+CREATE INDEX idx_t_mit ON t_mit (nachname);
+CREATE INDEX
+Time: 0.909 ms
+INSERT INTO t_mit SELECT 'Name' || (g % 5000) FROM generate_series(1, 300000) g;
+INSERT 0 300000
+Time: 711.373 ms
+\timing off
+Timing is off.

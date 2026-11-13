@@ -1,0 +1,107 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Testdaten
+SELECT COUNT(*) AS vorher FROM mitarbeiter;
+ vorher 
+--------
+      6
+(1 row)
+
+INSERT INTO mitarbeiter (vorname, nachname, email, gehalt, abteilung_id)
+SELECT 'Test' || g, 'Name' || (g % 5000), 'test' || g || '@example.com',
+       2000 + (g % 3000), (SELECT MIN(abteilung_id) FROM abteilung)
+FROM generate_series(1, 100000) AS g;
+INSERT 0 100000
+ANALYZE mitarbeiter;
+ANALYZE
+SELECT COUNT(*) FROM mitarbeiter;
+ count  
+--------
+ 100006
+(1 row)
+
+=== Aufgabe 2: Baseline
+EXPLAIN ANALYZE SELECT * FROM mitarbeiter WHERE nachname = 'Müller';
+                                                QUERY PLAN                                                
+----------------------------------------------------------------------------------------------------------
+ Seq Scan on mitarbeiter  (cost=0.00..2375.07 rows=20 width=55) (actual time=0.007..5.300 rows=1 loops=1)
+   Filter: ((nachname)::text = 'Müller'::text)
+   Rows Removed by Filter: 100005
+ Planning Time: 0.078 ms
+ Execution Time: 5.314 ms
+(5 rows)
+
+=== Aufgabe 3: Index
+CREATE INDEX idx_mitarbeiter_nachname ON mitarbeiter(nachname);
+CREATE INDEX
+=== Aufgabe 4: Vergleich
+EXPLAIN ANALYZE SELECT * FROM mitarbeiter WHERE nachname = 'Müller';
+                                                            QUERY PLAN                                                            
+----------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on mitarbeiter  (cost=4.45..76.70 rows=20 width=55) (actual time=0.139..0.140 rows=1 loops=1)
+   Recheck Cond: ((nachname)::text = 'Müller'::text)
+   Heap Blocks: exact=1
+   ->  Bitmap Index Scan on idx_mitarbeiter_nachname  (cost=0.00..4.44 rows=20 width=0) (actual time=0.017..0.017 rows=1 loops=1)
+         Index Cond: ((nachname)::text = 'Müller'::text)
+ Planning Time: 0.161 ms
+ Execution Time: 0.160 ms
+(7 rows)
+
+=== Ergänzung: EXPLAIN ohne ANALYZE, Kosten, Größe
+EXPLAIN SELECT * FROM mitarbeiter WHERE nachname = 'Müller';
+                                       QUERY PLAN                                       
+----------------------------------------------------------------------------------------
+ Bitmap Heap Scan on mitarbeiter  (cost=4.45..76.70 rows=20 width=55)
+   Recheck Cond: ((nachname)::text = 'Müller'::text)
+   ->  Bitmap Index Scan on idx_mitarbeiter_nachname  (cost=0.00..4.44 rows=20 width=0)
+         Index Cond: ((nachname)::text = 'Müller'::text)
+(4 rows)
+
+SELECT pg_size_pretty(pg_relation_size('mitarbeiter')) AS tabelle, pg_size_pretty(pg_relation_size('idx_mitarbeiter_nachname')) AS index_nachname;
+ tabelle | index_nachname 
+---------+----------------
+ 9000 kB | 816 kB
+(1 row)
+
+=== Ergänzung: Index bei LIKE mit führendem Platzhalter und bei Funktion
+EXPLAIN SELECT * FROM mitarbeiter WHERE nachname LIKE '%üller';
+                           QUERY PLAN                           
+----------------------------------------------------------------
+ Seq Scan on mitarbeiter  (cost=0.00..2375.07 rows=10 width=55)
+   Filter: ((nachname)::text ~~ '%üller'::text)
+(2 rows)
+
+EXPLAIN SELECT * FROM mitarbeiter WHERE UPPER(nachname) = 'MÜLLER';
+                           QUERY PLAN                            
+-----------------------------------------------------------------
+ Seq Scan on mitarbeiter  (cost=0.00..2625.09 rows=500 width=55)
+   Filter: (upper((nachname)::text) = 'MÜLLER'::text)
+(2 rows)
+
+=== Aufgabe 5: Rückbau
+SELECT COUNT(*) FROM mitarbeiter WHERE vorname LIKE 'Test%';
+ count  
+--------
+ 100000
+(1 row)
+
+DELETE FROM mitarbeiter WHERE vorname LIKE 'Test%';
+DELETE 100000
+DROP INDEX idx_mitarbeiter_nachname;
+DROP INDEX
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     6
+(1 row)
+
+SELECT mitarbeiter_id, nachname FROM mitarbeiter ORDER BY mitarbeiter_id;
+ mitarbeiter_id | nachname 
+----------------+----------
+              1 | Müller
+              2 | Maier
+              3 | Huber
+              4 | Berger
+              5 | Steiner
+              7 | Neumann
+(6 rows)
+

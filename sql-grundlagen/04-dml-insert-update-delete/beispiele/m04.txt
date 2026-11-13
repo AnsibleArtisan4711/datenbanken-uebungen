@@ -1,0 +1,113 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: INSERT (Skript 02_daten.sql)
+\i 02_daten.sql
+-- 02_daten.sql: Beispieldaten der Datenbank firma (Modul 4)
+-- Reihenfolge: zuerst abteilung, dann mitarbeiter und projekt (Fremdschlüssel)
+INSERT INTO abteilung (name, standort) VALUES
+    ('Verwaltung', 'Wien'),
+    ('Technik',    'Linz'),
+    ('Vertrieb',   'Graz');
+INSERT 0 3
+INSERT INTO mitarbeiter (vorname, nachname, email, gehalt, abteilung_id, einstellungsdatum) VALUES
+    ('Anna',  'Müller',  'anna.mueller@example.com',  3800.00, 2, DATE '2019-03-01'),
+    ('Peter', 'Maier',   'peter.maier@example.com',   4200.00, 2, DATE '2021-09-15'),
+    ('Karl',  'Huber',   'karl.huber@example.com',    3600.00, 2, DATE '2023-01-10'),
+    ('Eva',   'Berger',  NULL,                        3100.00, 1, DATE '2020-06-01'),
+    ('Lukas', 'Steiner', 'lukas.steiner@example.com', 4500.00, 3, DATE '2022-11-01');
+INSERT 0 5
+INSERT INTO projekt (bezeichnung, startdatum, abteilung_id) VALUES
+    ('Netzwerkmodernisierung', DATE '2026-02-01', 2),
+    ('Kundenportal',           DATE '2026-05-15', 3);
+INSERT 0 2
+SELECT * FROM abteilung ORDER BY abteilung_id;
+ abteilung_id |    name    | standort 
+--------------+------------+----------
+            1 | Verwaltung | Wien
+            2 | Technik    | Linz
+            3 | Vertrieb   | Graz
+(3 rows)
+
+SELECT mitarbeiter_id, vorname, nachname, email, gehalt, abteilung_id, einstellungsdatum FROM mitarbeiter ORDER BY mitarbeiter_id;
+ mitarbeiter_id | vorname | nachname |           email           | gehalt  | abteilung_id | einstellungsdatum 
+----------------+---------+----------+---------------------------+---------+--------------+-------------------
+              1 | Anna    | Müller   | anna.mueller@example.com  | 3800.00 |            2 | 2019-03-01
+              2 | Peter   | Maier    | peter.maier@example.com   | 4200.00 |            2 | 2021-09-15
+              3 | Karl    | Huber    | karl.huber@example.com    | 3600.00 |            2 | 2023-01-10
+              4 | Eva     | Berger   |                           | 3100.00 |            1 | 2020-06-01
+              5 | Lukas   | Steiner  | lukas.steiner@example.com | 4500.00 |            3 | 2022-11-01
+(5 rows)
+
+SELECT * FROM projekt ORDER BY projekt_id;
+ projekt_id |      bezeichnung       | startdatum | abteilung_id 
+------------+------------------------+------------+--------------
+          1 | Netzwerkmodernisierung | 2026-02-01 |            2
+          2 | Kundenportal           | 2026-05-15 |            3
+(2 rows)
+
+=== Aufgabe 2: UPDATE mit Primärschlüssel
+SELECT mitarbeiter_id, nachname, gehalt FROM mitarbeiter WHERE mitarbeiter_id = 1;
+ mitarbeiter_id | nachname | gehalt  
+----------------+----------+---------
+              1 | Müller   | 3800.00
+(1 row)
+
+UPDATE mitarbeiter SET gehalt = gehalt * 1.05 WHERE mitarbeiter_id = 1;
+UPDATE 1
+SELECT mitarbeiter_id, nachname, gehalt FROM mitarbeiter WHERE mitarbeiter_id = 1;
+ mitarbeiter_id | nachname | gehalt  
+----------------+----------+---------
+              1 | Müller   | 3990.00
+(1 row)
+
+=== Aufgabe 3: DELETE mit Prüfpunkt
+INSERT INTO mitarbeiter (vorname, nachname, abteilung_id) VALUES ('Test', 'Löschkandidat', 1) RETURNING mitarbeiter_id;
+ mitarbeiter_id 
+----------------
+              6
+(1 row)
+
+INSERT 0 1
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     6
+(1 row)
+
+DELETE FROM mitarbeiter WHERE mitarbeiter_id = 6;
+DELETE 1
+SELECT COUNT(*) FROM mitarbeiter;
+ count 
+-------
+     5
+(1 row)
+
+DELETE FROM abteilung WHERE abteilung_id = 2;
+psql:skript.sql:15: ERROR:  update or delete on table "abteilung" violates foreign key constraint "fk_mitarbeiter_abteilung" on table "mitarbeiter"
+DETAIL:  Key (abteilung_id)=(2) is still referenced from table "mitarbeiter".
+=== Ergänzung: UPDATE ohne WHERE (in Transaktion, danach zurückgerollt)
+BEGIN;
+BEGIN
+UPDATE mitarbeiter SET gehalt = 1;
+UPDATE 5
+SELECT nachname, gehalt FROM mitarbeiter ORDER BY mitarbeiter_id;
+ nachname | gehalt 
+----------+--------
+ Müller   |   1.00
+ Maier    |   1.00
+ Huber    |   1.00
+ Berger   |   1.00
+ Steiner  |   1.00
+(5 rows)
+
+ROLLBACK;
+ROLLBACK
+SELECT nachname, gehalt FROM mitarbeiter ORDER BY mitarbeiter_id;
+ nachname | gehalt  
+----------+---------
+ Müller   | 3990.00
+ Maier    | 4200.00
+ Huber    | 3600.00
+ Berger   | 3100.00
+ Steiner  | 4500.00
+(5 rows)
+

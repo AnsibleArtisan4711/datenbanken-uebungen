@@ -1,0 +1,122 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1 und 2: VIEW
+CREATE VIEW vw_mitarbeiterliste AS
+SELECT m.vorname, m.nachname, a.name AS abteilung, m.email
+FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id;
+CREATE VIEW
+SELECT * FROM vw_mitarbeiterliste ORDER BY nachname;
+ vorname | nachname | abteilung  |           email           
+---------+----------+------------+---------------------------
+ Eva     | Berger   | Verwaltung | 
+ Karl    | Huber    | Technik    | karl.huber@example.com
+ Peter   | Maier    | Technik    | peter.maier@example.com
+ Anna    | Müller   | Technik    | anna.mueller@example.com
+ Max     | Neumann  |            | max.neumann@example.com
+ Lukas   | Steiner  | Vertrieb   | lukas.steiner@example.com
+(6 rows)
+
+=== Ergänzung: View zeigt Änderungen sofort
+UPDATE mitarbeiter SET email = 'karl.h@example.com' WHERE nachname = 'Huber';
+UPDATE 1
+SELECT * FROM vw_mitarbeiterliste WHERE nachname = 'Huber';
+ vorname | nachname | abteilung |       email        
+---------+----------+-----------+--------------------
+ Karl    | Huber    | Technik   | karl.h@example.com
+(1 row)
+
+UPDATE mitarbeiter SET email = 'karl.huber@example.com' WHERE nachname = 'Huber';
+UPDATE 1
+\d+ vw_mitarbeiterliste
+                              View "public.vw_mitarbeiterliste"
+  Column   |          Type          | Collation | Nullable | Default | Storage  | Description 
+-----------+------------------------+-----------+----------+---------+----------+-------------
+ vorname   | character varying(50)  |           |          |         | extended | 
+ nachname  | character varying(50)  |           |          |         | extended | 
+ abteilung | character varying(50)  |           |          |         | extended | 
+ email     | character varying(100) |           |          |         | extended | 
+View definition:
+ SELECT m.vorname,
+    m.nachname,
+    a.name AS abteilung,
+    m.email
+   FROM mitarbeiter m
+     LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id;
+
+=== Aufgabe 3: MATERIALIZED VIEW
+CREATE MATERIALIZED VIEW mv_abteilung_statistik AS
+SELECT a.name AS abteilung, COUNT(m.mitarbeiter_id) AS anzahl
+FROM abteilung a LEFT JOIN mitarbeiter m ON m.abteilung_id = a.abteilung_id
+GROUP BY a.name;
+SELECT 4
+SELECT * FROM mv_abteilung_statistik ORDER BY abteilung;
+ abteilung  | anzahl 
+------------+--------
+ Archiv     |      0
+ Technik    |      3
+ Vertrieb   |      1
+ Verwaltung |      1
+(4 rows)
+
+UPDATE mitarbeiter SET abteilung_id = (SELECT abteilung_id FROM abteilung WHERE name = 'Archiv') WHERE nachname = 'Neumann';
+UPDATE 1
+SELECT * FROM mv_abteilung_statistik ORDER BY abteilung;
+ abteilung  | anzahl 
+------------+--------
+ Archiv     |      0
+ Technik    |      3
+ Vertrieb   |      1
+ Verwaltung |      1
+(4 rows)
+
+REFRESH MATERIALIZED VIEW mv_abteilung_statistik;
+REFRESH MATERIALIZED VIEW
+SELECT * FROM mv_abteilung_statistik ORDER BY abteilung;
+ abteilung  | anzahl 
+------------+--------
+ Archiv     |      1
+ Technik    |      3
+ Vertrieb   |      1
+ Verwaltung |      1
+(4 rows)
+
+UPDATE mitarbeiter SET abteilung_id = NULL WHERE nachname = 'Neumann';
+UPDATE 1
+=== Aufgabe 4: DROP VIEW und neu anlegen
+DROP VIEW vw_mitarbeiterliste;
+DROP VIEW
+SELECT * FROM vw_mitarbeiterliste;
+psql:skript.sql:24: ERROR:  relation "vw_mitarbeiterliste" does not exist
+LINE 1: SELECT * FROM vw_mitarbeiterliste;
+                      ^
+CREATE VIEW vw_mitarbeiterliste AS
+SELECT m.vorname, m.nachname, a.name AS abteilung, m.email
+FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id;
+CREATE VIEW
+SELECT COUNT(*) FROM vw_mitarbeiterliste;
+ count 
+-------
+     6
+(1 row)
+
+=== Ergänzung: Abhängigkeiten
+DROP TABLE abteilung;
+psql:skript.sql:30: ERROR:  cannot drop table abteilung because other objects depend on it
+DETAIL:  constraint fk_mitarbeiter_abteilung on table mitarbeiter depends on table abteilung
+constraint fk_projekt_abteilung on table projekt depends on table abteilung
+materialized view mv_abteilung_statistik depends on table abteilung
+view vw_mitarbeiterliste depends on table abteilung
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+\dv
+               List of relations
+ Schema |        Name         | Type |  Owner  
+--------+---------------------+------+---------
+ public | vw_mitarbeiterliste | view | labuser
+(1 row)
+
+\dm
+                       List of relations
+ Schema |          Name          |       Type        |  Owner  
+--------+------------------------+-------------------+---------
+ public | mv_abteilung_statistik | materialized view | labuser
+(1 row)
+

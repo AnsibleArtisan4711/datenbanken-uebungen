@@ -1,0 +1,26 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Ergänzung: Rechte auf eine View statt auf die Tabelle (als Superuser postgres in der Datenbank firma)
+CREATE ROLE leser;
+CREATE ROLE
+GRANT SELECT ON vw_mitarbeiterliste TO leser;
+GRANT
+SET ROLE leser;
+SET
+SELECT COUNT(*) FROM vw_mitarbeiterliste;
+ count 
+-------
+     6
+(1 row)
+
+SELECT gehalt FROM mitarbeiter;
+psql:skript.sql:6: ERROR:  permission denied for table mitarbeiter
+SELECT gehalt FROM vw_mitarbeiterliste;
+psql:skript.sql:7: ERROR:  column "gehalt" does not exist
+LINE 1: SELECT gehalt FROM vw_mitarbeiterliste;
+               ^
+RESET ROLE;
+RESET
+DROP OWNED BY leser;
+DROP OWNED
+DROP ROLE leser;
+DROP ROLE

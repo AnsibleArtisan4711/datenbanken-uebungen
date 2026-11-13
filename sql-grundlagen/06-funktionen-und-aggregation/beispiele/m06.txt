@@ -1,0 +1,55 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: Skalarfunktionen
+SELECT UPPER(nachname) AS nachname, LOWER(vorname) AS vorname, COALESCE(email, 'Nicht angegeben') AS email FROM mitarbeiter ORDER BY mitarbeiter_id;
+ nachname | vorname |           email           
+----------+---------+---------------------------
+ MÜLLER   | anna    | anna.mueller@example.com
+ MAIER    | peter   | peter.maier@example.com
+ HUBER    | karl    | karl.huber@example.com
+ BERGER   | eva     | Nicht angegeben
+ STEINER  | lukas   | lukas.steiner@example.com
+(5 rows)
+
+=== Aufgabe 2: Aggregation
+SELECT COUNT(*) AS anzahl, AVG(gehalt) AS durchschnitt, SUM(gehalt) AS summe, MIN(gehalt) AS minimum, MAX(gehalt) AS maximum FROM mitarbeiter;
+ anzahl |     durchschnitt      |  summe   | minimum | maximum 
+--------+-----------------------+----------+---------+---------
+      5 | 3878.0000000000000000 | 19390.00 | 3100.00 | 4500.00
+(1 row)
+
+SELECT COUNT(*) AS alle_zeilen, COUNT(email) AS mit_email FROM mitarbeiter;
+ alle_zeilen | mit_email 
+-------------+-----------
+           5 |         4
+(1 row)
+
+SELECT ROUND(AVG(gehalt), 2) AS durchschnitt_gerundet FROM mitarbeiter;
+ durchschnitt_gerundet 
+-----------------------
+               3878.00
+(1 row)
+
+=== Aufgabe 3: GROUP BY und HAVING
+SELECT abteilung_id, COUNT(*) AS anzahl FROM mitarbeiter GROUP BY abteilung_id ORDER BY abteilung_id;
+ abteilung_id | anzahl 
+--------------+--------
+            1 |      1
+            2 |      3
+            3 |      1
+(3 rows)
+
+SELECT abteilung_id, COUNT(*) AS anzahl FROM mitarbeiter GROUP BY abteilung_id HAVING COUNT(*) > 1;
+ abteilung_id | anzahl 
+--------------+--------
+            2 |      3
+(1 row)
+
+=== Kontrollfrage 1 und 2: Fehlermeldungen
+SELECT abteilung_id, COUNT(*) FROM mitarbeiter;
+psql:skript.sql:11: ERROR:  column "mitarbeiter.abteilung_id" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT abteilung_id, COUNT(*) FROM mitarbeiter;
+               ^
+SELECT abteilung_id, COUNT(*) FROM mitarbeiter WHERE COUNT(*) > 1 GROUP BY abteilung_id;
+psql:skript.sql:12: ERROR:  aggregate functions are not allowed in WHERE
+LINE 1: ...ECT abteilung_id, COUNT(*) FROM mitarbeiter WHERE COUNT(*) >...
+                                                             ^

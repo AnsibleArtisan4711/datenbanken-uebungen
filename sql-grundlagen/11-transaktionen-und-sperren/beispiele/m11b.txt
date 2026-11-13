@@ -1,0 +1,103 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 4: Locks und Isolation (Tab 1 = A, Tab 2 = B, Tab 3 = C; Zeit in Sekunden seit Start)
+C| SELECT pid, state, wait_event_type, wait_event, left(query, 60) AS query FROM pg_stat_activity WHERE datname = 'firma' AND pid <> pg_backend_pid() ORDER BY pid;
+C|  pid  | state  | wait_event_type |  wait_event   |                            query                             
+C| ------+--------+-----------------+---------------+--------------------------------------------------------------
+C|  1802 | active | Timeout         | PgSleep       | SELECT pg_sleep(6);
+C|  1807 | active | Lock            | transactionid | UPDATE mitarbeiter SET gehalt = gehalt + 50 WHERE mitarbeite
+C| (2 rows)
+C| 
+C| SELECT locktype, mode, granted, pid FROM pg_locks WHERE locktype IN ('transactionid') ORDER BY granted DESC, pid;
+C|    locktype    |     mode      | granted | pid  
+C| ---------------+---------------+---------+------
+C|  transactionid | ExclusiveLock | t       | 1802
+C|  transactionid | ExclusiveLock | t       | 1807
+C|  transactionid | ShareLock     | f       | 1807
+C| (3 rows)
+C| 
+C| SELECT pid, pg_blocking_pids(pid) AS blockiert_von FROM pg_stat_activity WHERE cardinality(pg_blocking_pids(pid)) > 0;
+C|  pid  | blockiert_von 
+C| ------+---------------
+C|  1807 | {1802}
+C| (1 row)
+C| 
+A| BEGIN;
+A| BEGIN
+A| UPDATE mitarbeiter SET gehalt = gehalt + 100 WHERE mitarbeiter_id = 1;
+A| UPDATE 1
+A| SELECT pg_sleep(6);
+A|  pg_sleep 
+A| ----------
+A|  
+A| (1 row)
+A| 
+A| COMMIT;
+A| COMMIT
+A| SELECT gehalt FROM mitarbeiter WHERE mitarbeiter_id = 1;
+A|  gehalt  
+A| ---------
+A|  4140.00
+A| (1 row)
+A| 
+B| \timing on
+B| Timing is on.
+B| SELECT nachname, gehalt FROM mitarbeiter WHERE mitarbeiter_id = 1;
+B|  nachname | gehalt  
+B| ----------+---------
+B|  Müller   | 3990.00
+B| (1 row)
+B| 
+B| Time: 0.996 ms
+B| UPDATE mitarbeiter SET gehalt = gehalt + 50 WHERE mitarbeiter_id = 1;
+B| UPDATE 1
+B| Time: 4509.406 ms (00:04.509)
+B| SELECT nachname, gehalt FROM mitarbeiter WHERE mitarbeiter_id = 1;
+B|  nachname | gehalt  
+B| ----------+---------
+B|  Müller   | 4140.00
+B| (1 row)
+B| 
+B| Time: 1.499 ms
+
+=== Aufgabe 5: Deadlock
+B| BEGIN;
+B| BEGIN
+B| UPDATE mitarbeiter SET gehalt = gehalt WHERE mitarbeiter_id = 2;
+B| UPDATE 1
+B| SELECT pg_sleep(2);
+B|  pg_sleep 
+B| ----------
+B|  
+B| (1 row)
+B| 
+B| UPDATE mitarbeiter SET gehalt = gehalt WHERE mitarbeiter_id = 1;
+B| UPDATE 1
+B| ROLLBACK;
+B| ROLLBACK
+A| BEGIN;
+A| BEGIN
+A| UPDATE mitarbeiter SET gehalt = gehalt WHERE mitarbeiter_id = 1;
+A| UPDATE 1
+A| SELECT pg_sleep(2);
+A|  pg_sleep 
+A| ----------
+A|  
+A| (1 row)
+A| 
+A| UPDATE mitarbeiter SET gehalt = gehalt WHERE mitarbeiter_id = 2;
+A| ERROR:  deadlock detected
+A| DETAIL:  Process 1816 waits for ShareLock on transaction 1208; blocked by process 1820.
+A| Process 1820 waits for ShareLock on transaction 1207; blocked by process 1816.
+A| HINT:  See server log for query details.
+A| CONTEXT:  while updating tuple (0,2) in relation "mitarbeiter"
+A| ROLLBACK;
+A| ROLLBACK
+=== Rückbau
+UPDATE mitarbeiter SET gehalt = 3990.00 WHERE mitarbeiter_id = 1;
+UPDATE 1
+SELECT (SELECT COUNT(*) FROM mitarbeiter) AS original, (SELECT COUNT(*) FROM mitarbeiter_sicherung) AS sicherung;
+ original | sicherung 
+----------+-----------
+        7 |         6
+(1 row)
+

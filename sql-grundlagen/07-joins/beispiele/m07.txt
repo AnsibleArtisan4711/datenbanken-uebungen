@@ -1,0 +1,112 @@
+# Ausgaben aus der Testumgebung (Ubuntu 24.04, PostgreSQL 16.15, Locale de_AT.UTF-8, Namespaces db-server/db-client, siehe testlabor30.sh, psql statt DBeaver); keine Aufzeichnung von Hyper-V, Debian 12, PostgreSQL 15 oder DBeaver. Prozessnummern, Zeiten, Pläne und Größen ändern sich bei jedem Lauf.
+=== Aufgabe 1: INNER JOIN
+SELECT m.vorname, m.nachname, a.name AS abteilung FROM mitarbeiter m INNER JOIN abteilung a ON a.abteilung_id = m.abteilung_id ORDER BY m.mitarbeiter_id;
+ vorname | nachname | abteilung  
+---------+----------+------------
+ Anna    | Müller   | Technik
+ Peter   | Maier    | Technik
+ Karl    | Huber    | Technik
+ Eva     | Berger   | Verwaltung
+ Lukas   | Steiner  | Vertrieb
+(5 rows)
+
+=== Aufgabe 2: Vorbereitung
+INSERT INTO mitarbeiter (vorname, nachname, email, gehalt, abteilung_id, einstellungsdatum) VALUES ('Max', 'Neumann', 'max.neumann@example.com', 3300.00, NULL, DATE '2024-04-01');
+INSERT 0 1
+INSERT INTO abteilung (name, standort) VALUES ('Archiv', 'Wien');
+INSERT 0 1
+SELECT * FROM abteilung ORDER BY abteilung_id;
+ abteilung_id |    name    | standort 
+--------------+------------+----------
+            1 | Verwaltung | Wien
+            2 | Technik    | Linz
+            3 | Vertrieb   | Graz
+            4 | Archiv     | Wien
+(4 rows)
+
+=== Aufgabe 3: LEFT JOIN
+SELECT m.nachname, a.name AS abteilung FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id ORDER BY m.mitarbeiter_id;
+ nachname | abteilung  
+----------+------------
+ Müller   | Technik
+ Maier    | Technik
+ Huber    | Technik
+ Berger   | Verwaltung
+ Steiner  | Vertrieb
+ Neumann  | 
+(6 rows)
+
+SELECT m.nachname FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id WHERE a.abteilung_id IS NULL;
+ nachname 
+----------
+ Neumann
+(1 row)
+
+=== Aufgabe 4: RIGHT JOIN und FULL JOIN
+SELECT a.name AS abteilung, m.nachname FROM mitarbeiter m RIGHT JOIN abteilung a ON a.abteilung_id = m.abteilung_id WHERE m.mitarbeiter_id IS NULL;
+ abteilung | nachname 
+-----------+----------
+ Archiv    | 
+(1 row)
+
+SELECT m.nachname, a.name AS abteilung FROM mitarbeiter m FULL JOIN abteilung a ON a.abteilung_id = m.abteilung_id WHERE m.mitarbeiter_id IS NULL OR a.abteilung_id IS NULL;
+ nachname | abteilung 
+----------+-----------
+ Neumann  | 
+          | Archiv
+(2 rows)
+
+=== Aufgabe 5: Kartesisches Produkt
+SELECT COUNT(*) FROM mitarbeiter CROSS JOIN abteilung;
+ count 
+-------
+    24
+(1 row)
+
+SELECT (SELECT COUNT(*) FROM mitarbeiter) * (SELECT COUNT(*) FROM abteilung) AS produkt;
+ produkt 
+---------
+      24
+(1 row)
+
+=== Aufgabe 6: projekt und abteilung
+SELECT p.bezeichnung AS projekt, a.name AS abteilung FROM projekt p INNER JOIN abteilung a ON a.abteilung_id = p.abteilung_id ORDER BY p.projekt_id;
+        projekt         | abteilung 
+------------------------+-----------
+ Netzwerkmodernisierung | Technik
+ Kundenportal           | Vertrieb
+(2 rows)
+
+=== Ergänzung: Zeilenzahlen der Join-Arten
+SELECT 'INNER' AS art, COUNT(*) FROM mitarbeiter m INNER JOIN abteilung a ON a.abteilung_id = m.abteilung_id
+UNION ALL SELECT 'LEFT', COUNT(*) FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id
+UNION ALL SELECT 'RIGHT', COUNT(*) FROM mitarbeiter m RIGHT JOIN abteilung a ON a.abteilung_id = m.abteilung_id
+UNION ALL SELECT 'FULL', COUNT(*) FROM mitarbeiter m FULL JOIN abteilung a ON a.abteilung_id = m.abteilung_id;
+  art  | count 
+-------+-------
+ INNER |     5
+ LEFT  |     6
+ RIGHT |     6
+ FULL  |     7
+(4 rows)
+
+=== Ergänzung: Filter im WHERE macht den LEFT JOIN zum INNER JOIN
+SELECT m.nachname, a.name FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id WHERE a.name = 'Technik';
+ nachname |  name   
+----------+---------
+ Maier    | Technik
+ Huber    | Technik
+ Müller   | Technik
+(3 rows)
+
+SELECT m.nachname, a.name FROM mitarbeiter m LEFT JOIN abteilung a ON a.abteilung_id = m.abteilung_id AND a.name = 'Technik' ORDER BY m.mitarbeiter_id;
+ nachname |  name   
+----------+---------
+ Müller   | Technik
+ Maier    | Technik
+ Huber    | Technik
+ Berger   | 
+ Steiner  | 
+ Neumann  | 
+(6 rows)
+

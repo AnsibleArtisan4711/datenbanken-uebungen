@@ -1,0 +1,6 @@
+"Mitarbeitername","E-Mail","Gehalt","Abteilungsname","Standort","Projektbezeichnung","Projektstart"
+"Anna Müller","anna.mueller@example.com","3800.00","Technik","Linz","Netzwerkmodernisierung","2026-02-01"
+"Peter Maier","peter.maier@example.com","4200.00","Technik","Linz","Netzwerkmodernisierung","2026-02-01"
+"Karl Huber","karl.huber@example.com","3600.00","Technik","Linz","Netzwerkmodernisierung","2026-02-01"
+"Eva Berger","","3100.00","Verwaltung","Wien","",""
+"Lukas Steiner","lukas.steiner@example.com","4500.00","Vertrieb","Graz","Kundenportal","2026-05-15"
