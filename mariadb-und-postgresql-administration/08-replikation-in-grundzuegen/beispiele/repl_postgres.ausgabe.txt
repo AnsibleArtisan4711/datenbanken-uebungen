@@ -1,0 +1,50 @@
+
+## 1. Primär: Replikationsrolle, Testdaten (wal_level ist in PostgreSQL 16 standardmäßig replica)
+ wal_level 
+-----------
+ replica
+(1 row)
+
+ max_wal_senders 
+-----------------
+ 10
+(1 row)
+
+
+## 2. Standby: Basissicherung mit -R (schreibt primary_conninfo und standby.signal) und Replikationsslot
+Dateien: standby.signal vorhanden: ja
+primary_slot_name = 'slot_stby'
+
+## 3. Zustand prüfen: Primär sieht den Standby, Standby ist im Wiederherstellungsmodus
+   state   | sync_state | client_addr 
+-----------+------------+-------------
+ streaming | async      | 127.0.0.1
+(1 row)
+
+ slot_name | active 
+-----------+--------
+ slot_stby | t
+(1 row)
+
+ standby 
+---------
+ t
+(1 row)
+
+
+## 4. Änderung auf dem Primär, Kontrolle auf dem Standby; Schreiben auf dem Standby ist verboten
+ id |    name     
+----+-------------
+  1 | Muster GmbH
+  2 | Test AG
+  3 | Beispiel KG
+(3 rows)
+
+ERROR:  cannot execute INSERT in a read-only transaction
+
+## 5. Verzögerung messen (Byte-Abstand und Zeit)
+ rueckstand_bytes 
+------------------
+                0
+(1 row)
+

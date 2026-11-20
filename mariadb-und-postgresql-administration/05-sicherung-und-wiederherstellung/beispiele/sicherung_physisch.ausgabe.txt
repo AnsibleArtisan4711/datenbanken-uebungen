@@ -1,0 +1,42 @@
+
+## 1. MariaDB: mariabackup --backup (kopiert die Dateien im laufenden Betrieb)
+  completed OK!
+aria_log.00000001
+aria_log_control
+backup-my.cnf
+ib_logfile0
+ibdata1
+mysql
+performance_schema
+shop
+sys
+xtrabackup_binlog_info
+xtrabackup_checkpoints
+xtrabackup_info
+
+## 2. mariabackup --prepare (Protokoll einspielen, Sicherung konsistent machen)
+  completed OK!
+
+## 3. Wiederherstellen: Dienst stoppen, Datenverzeichnis leeren, --copy-back, Besitzer setzen, starten
+  completed OK!
++--------+
+| kunden |
++--------+
+|      3 |
++--------+
+
+## 4. PostgreSQL: pg_basebackup (gesamter Cluster, Format tar, komprimiert; -X fetch legt die nötigen WAL-Dateien mit in die Sicherung)
+47009/47009 kB (100%), 1/1 tablespace
+backup_manifest
+base.tar.gz
+-- Inhalt von backup_label (Auszug):
+START WAL LOCATION: 0/2000028 (file 000000010000000000000002)
+CHECKPOINT LOCATION: 0/2000098
+BACKUP METHOD: streamed
+
+## 5. PostgreSQL: Wiederherstellung = Cluster anhalten, Datenverzeichnis ersetzen, starten
+ kunden 
+--------
+      3
+(1 row)
+

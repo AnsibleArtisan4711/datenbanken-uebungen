@@ -1,0 +1,26 @@
+
+## MariaDB: Konten mit Host-Platzhalter oder allen globalen Rechten
++---------+-----------+--------------+----------------------+
+| user    | host      | host_hinweis | rechte               |
++---------+-----------+--------------+----------------------+
+| bericht | %         | Host %       | alle globalen Rechte |
+| lesen   | 10.31.0.% |              |                      |
+| mysql   | localhost |              | alle globalen Rechte |
+| ohnepw  | localhost |              |                      |
++---------+-----------+--------------+----------------------+
+-- Konten ohne Kennwort (laut mysql.user):
++--------+-----------+
+| User   | Host      |
++--------+-----------+
+| ohnepw | localhost |
++--------+-----------+
+
+## PostgreSQL: Rollen mit Superuser-Recht, ohne Kennwort und Mitgliedschaften
+ rolname  | superuser | login | hat_kennwort 
+----------+-----------+-------+--------------
+ bericht  | t         | t     | t
+ lesen    | f         | t     | t
+ ohnepw   | f         | t     | f
+ postgres | t         | t     | f
+(4 rows)
+

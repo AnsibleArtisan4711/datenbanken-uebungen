@@ -1,0 +1,23 @@
+
+## 1. Testzertifikat für den Namen db.example.com erzeugen (selbstsigniert, 30 Tage)
+  subject=CN = db.example.com
+  issuer=CN = db.example.com
+
+## 2. MariaDB mit TLS starten und prüfen
+have_ssl   YES
+-- Verbindung MIT TLS (Zertifikat wird in diesem Test nicht geprüft):
+Variable_name   Value
+Ssl_cipher   TLS_AES_256_GCM_SHA384
+Variable_name   Value
+Ssl_version   TLSv1.3
+-- Verbindung OHNE TLS wird für diesen Benutzer abgelehnt:
+ERROR 1045 (28000): Access denied for user 'tlsuser'@'host' (using password: YES)
+
+## 3. PostgreSQL mit TLS: ssl=on, Schlüsseldatei darf nur dem Besitzer lesbar sein
+-- Verbindung mit TLS:
+ ssl | version |         cipher         
+-----+---------+------------------------
+ t   | TLSv1.3 | TLS_AES_256_GCM_SHA384
+(1 row)
+-- Verbindung ohne TLS wird abgelehnt (hostnossl ... reject):
+psql: error: connection to server at "127.0.0.1", port 5441 failed: FATAL:  pg_hba.conf rejects connection for host "...", user "tlsuser", database "postgres", no encryption

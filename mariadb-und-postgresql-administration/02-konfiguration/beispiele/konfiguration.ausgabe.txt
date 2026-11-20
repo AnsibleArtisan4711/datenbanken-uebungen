@@ -1,0 +1,78 @@
+
+## 1. MariaDB: Konfigurationsdateien der Debian/Ubuntu-Pakete
+50-client.cnf
+50-mysql-clients.cnf
+50-mysqld_safe.cnf
+50-server.cnf
+60-galera.cnf
+provider_bzip2.cnf
+provider_lz4.cnf
+provider_lzma.cnf
+provider_lzo.cnf
+provider_snappy.cnf
+-- Auszug aus 50-server.cnf (nur aktive Zeilen):
+[server]
+[mysqld]
+pid-file                = /run/mysqld/mysqld.pid
+basedir                 = /usr
+bind-address            = 127.0.0.1
+expire_logs_days        = 10
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci
+
+## 2. MariaDB: welche Dateien werden gelesen? (--help, Suchreihenfolge)
+/etc/my.cnf /etc/mysql/my.cnf ~/.my.cnf 
+
+## 3. MariaDB: Dauerhaft (Datei) gegen Laufzeit (SET GLOBAL)
+Start mit Option --max-connections=77 (gleiche Wirkung wie max_connections = 77 in einer .cnf-Datei):
+max_connections	77
+nach SET GLOBAL:
+max_connections	120
+(Nach einem Neustart gilt wieder der Wert aus der Konfiguration; SET GLOBAL ist nicht dauerhaft.)
+
+## 4. PostgreSQL: Dateien und Herkunft eines Parameters (pg_settings)
+conf.d
+environment
+pg_ctl.conf
+pg_hba.conf
+pg_ident.conf
+postgresql.conf
+start.conf
+       name       |  setting  | unit |       source       | aus_datei 
+------------------+-----------+------+--------------------+-----------
+ listen_addresses | localhost |      | default            | f
+ max_connections  | 100       |      | configuration file | t
+ shared_buffers   | 16384     | 8kB  | configuration file | t
+ work_mem         | 4096      | kB   | default            | f
+(4 rows)
+
+
+## 5. PostgreSQL: ALTER SYSTEM, reload und Neustart-pflichtige Parameter
+ALTER SYSTEM
+ALTER SYSTEM
+      name       | setting | pending_restart 
+-----------------+---------+-----------------
+ max_connections | 100     | f
+ work_mem        | 4096    | f
+(2 rows)
+
+-- nach pg_reload_conf(): work_mem gilt, max_connections wartet auf Neustart
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+      name       | setting | pending_restart 
+-----------------+---------+-----------------
+ max_connections | 100     | t
+ work_mem        | 8192    | f
+(2 rows)
+
+-- Datei, in die ALTER SYSTEM schreibt:
+work_mem = '8MB'
+max_connections = '150'
+ max_connections 
+-----------------
+ 150
+(1 row)
+

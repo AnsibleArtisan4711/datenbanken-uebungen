@@ -1,0 +1,8 @@
+# Erfundene Beispielkonfiguration (MariaDB) mit absichtlichen Schwächen
+[mariadbd]
+bind-address        = 0.0.0.0
+skip-grant-tables
+max_connections     = 5000
+local_infile        = 1
+innodb_buffer_pool_size = 128M
+character-set-server = utf8mb4

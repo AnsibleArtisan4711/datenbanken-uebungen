@@ -1,0 +1,36 @@
+
+## 1. Auf welchen Adressen lauschen die Dienste?
+State Local Peer
+LISTEN 127.0.0.1:5441 postgres
+LISTEN 127.0.0.1:3311 mariadbd
+(127.0.0.1 = nur der eigene Rechner. Für Zugriff vom Client muss bind-address bzw. listen_addresses gesetzt UND die Firewall/pg_hba.conf angepasst werden.)
+
+## 2. MariaDB: Anmeldung über Socket (Betriebssystemkonto root) und über TCP
+mysql   localhost
+root   localhost
+-- Die Anmeldung per Socket als Betriebssystem-root hat gerade funktioniert (diese Skriptzeilen laufen so). Per TCP ohne Kennwort wird root abgewiesen:
+ERROR 1698 (28000): Access denied for user 'root'@'localhost'
+
+## 3. PostgreSQL: pg_hba.conf entscheidet über Herkunft und Methode (erste passende Zeile gilt)
+local   all             postgres                                peer
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            scram-sha-256
+host    all             all             ::1/128                 scram-sha-256
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            scram-sha-256
+host    replication     all             ::1/128                 scram-sha-256
+-- Verbindung per TCP ohne Kennwort als Benutzer postgres:
+psql: error: connection to server at "127.0.0.1", port 5441 failed: fe_sendauth: no password supplied
+
+## 4. Eine zu offene Regel erkennen und entschärfen (pg_hba.conf, erfundene Adresse 10.31.0.0/24)
+ line_number | type | database | address | auth_method 
+-------------+------+----------+---------+-------------
+         133 | host | {all}    | 0.0.0.0 | trust
+(1 row)
+
+-- 'trust' für 0.0.0.0/0 bedeutet: jeder darf sich ohne Kennwort anmelden. Ersetzen durch Subnetz und scram-sha-256:
+ line_number | type | database | user_name |  address  |    netmask    |  auth_method  
+-------------+------+----------+-----------+-----------+---------------+---------------
+         133 | host | {shop}   | {app}     | 10.31.0.0 | 255.255.255.0 | scram-sha-256
+(1 row)
+

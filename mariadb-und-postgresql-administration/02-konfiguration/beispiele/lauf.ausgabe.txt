@@ -1,0 +1,17 @@
+$ python3 konfig_pruefen.py beispiel_mariadb.cnf
+KRITISCH  skip_grant_tables = True: Rechteprüfung ist abgeschaltet: jeder kann sich ohne Kennwort als Administrator anmelden
+WARNUNG   bind_address = 0.0.0.0: Dienst lauscht auf allen Schnittstellen; Zugriff nur bewusst und mit Firewall zulassen
+WARNUNG   max_connections = 5000: sehr viele Verbindungen: Speicherbedarf je Verbindung beachten, ggf. Verbindungspool einsetzen
+WARNUNG   local_infile = 1: Dateien des Clients können geladen werden; nur bei Bedarf aktivieren
+4 Hinweis(e) in beispiel_mariadb.cnf
+Rückgabecode: 1
+
+$ python3 konfig_pruefen.py beispiel_postgresql.conf
+WARNUNG   listen_addresses = *: Dienst lauscht auf allen Schnittstellen; zusätzlich pg_hba.conf und Firewall prüfen
+WARNUNG   max_connections = 2000: sehr viele Verbindungen: Speicherbedarf je Verbindung beachten, ggf. Verbindungspool einsetzen
+KRITISCH  fsync = off: Daten können nach einem Absturz beschädigt sein; nur für Wegwerf-Testsysteme vertretbar
+WARNUNG   ssl = off: Verbindungen werden nicht verschlüsselt
+HINWEIS   log_connections = off: Anmeldungen werden nicht protokolliert
+5 Hinweis(e) in beispiel_postgresql.conf
+Rückgabecode: 1
+

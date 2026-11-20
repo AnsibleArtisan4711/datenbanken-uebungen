@@ -1,0 +1,7 @@
+Modell (erfundene Verzögerungen 5 bis 400 ms, Ausfall nach 800 ms, 1 Transaktion je ms):
+  async: dem Client bestätigt:  800, davon nach dem Ausfall auf dem Replikat nicht vorhanden:  207
+  sync : dem Client bestätigt:  593, davon nach dem Ausfall auf dem Replikat nicht vorhanden:    0
+Folge: Asynchrone Replikation kann bestätigte Transaktionen verlieren (RPO > 0); synchrone nicht, kostet aber Wartezeit je Schreibvorgang.
+  async, feste Verzögerung   5 ms: verloren 4
+  async, feste Verzögerung  50 ms: verloren 49
+  async, feste Verzögerung 400 ms: verloren 399

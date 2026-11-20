@@ -1,0 +1,37 @@
+
+## 1. Verbindungen nach Zustand
+ state  | count 
+--------+-------
+ active |     1
+(1 row)
+
+
+## 2. Eine blockierte Abfrage sichtbar machen (Sitzung A hält eine Sperre, Sitzung B wartet)
+ wait_event_type |  wait_event   |                 abfrage                  
+-----------------+---------------+------------------------------------------
+ Lock            | transactionid | update konto set stand = 80 where id = 1
+(1 row)
+
+ hat_pid | blockiert_von 
+---------+---------------
+ t       |             1
+(1 row)
+
+
+## 3. Datenbankstatistik: Commits, Rollbacks, Deadlocks, Tupel
+ datname | hat_commits | xact_rollback | deadlocks | conflicts 
+---------+-------------+---------------+-----------+-----------
+ shop    | t           |             0 |         0 |         0
+(1 row)
+
+
+## 4. Lange laufende Anweisungen (Schwelle 2 Sekunden) finden
+      abfrage       | laenger_als_2s 
+--------------------+----------------
+ select pg_sleep(4) | t
+(1 row)
+
+
+## 5. Protokoll: Anmeldefehler stehen in der Logdatei
+niemand@shop FATAL:  password authentication failed for user "niemand"
+niemand@shop FATAL:  password authentication failed for user "niemand"

@@ -1,0 +1,11 @@
+Ziele: RPO höchstens 15 min, RTO höchstens 120 min; Datenbank 50 GB (Annahme)
+Variante                                RPO min  RTO min  Ergebnis
+Täglich logisch (Dump)                     1440       21  verfehlt: RPO
+Täglich physisch (Basissicherung)          1440        6  verfehlt: RPO
+Physisch + Protokollarchiv                    5       54  erfüllt
+
+Ziele: RPO höchstens 1440 min, RTO höchstens 480 min; Datenbank 50 GB (Annahme)
+Variante                                RPO min  RTO min  Ergebnis
+Täglich logisch (Dump)                     1440       21  erfüllt
+Täglich physisch (Basissicherung)          1440        6  erfüllt
+Physisch + Protokollarchiv                    5       54  erfüllt

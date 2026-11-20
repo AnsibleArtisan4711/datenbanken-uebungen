@@ -1,0 +1,30 @@
+
+## 1. Datenbank, Tabelle und Beispieldaten anlegen
+
+## 2. Rollen statt Einzelrechte: lesen und schreiben getrennt
+
+## 3. Was dürfen die Benutzer? (Anmeldung über TCP als Benutzer)
+-- anna (Rolle auswertung): lesen geht
+id	name	ort
+1	Muster GmbH	Beispielstadt
+2	Test AG	Musterdorf
+-- anna: schreiben ist verboten
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'anna'@'localhost' for table `shop`.`kunde`
+-- app (Rolle anwendung): schreiben geht
+anzahl
+3
+-- app: Tabelle löschen ist verboten
+ERROR 1142 (42000) at line 1: DROP command denied to user 'app'@'localhost' for table `shop`.`kunde`
+
+## 4. Rechte anzeigen
+Grants for anna@127.0.0.1
+GRANT `auswertung` TO `anna`@`127.0.0.1`
+GRANT USAGE ON *.* TO `anna`@`127.0.0.1` IDENTIFIED BY PASSWORD '<Hash>'
+SET DEFAULT ROLE `auswertung` FOR `anna`@`127.0.0.1`
+Grants for auswertung
+GRANT USAGE ON *.* TO `auswertung`
+GRANT SELECT ON `shop`.* TO `auswertung`
+(Die Fehlermeldungen nennen den Host als 'localhost': der Server löst 127.0.0.1 in einen Namen auf. Das Konto 'anna'@'127.0.0.1' hat trotzdem gepasst.)
+
+## 5. Falscher Host / falsches Kennwort
+ERROR 1045 (28000): Access denied for user 'anna'@'host' (using password: YES)

@@ -1,0 +1,27 @@
+
+## 1. Tabelle mit 200000 Zeilen
+Table	Op	Msg_type	Msg_text
+shop.bestellung	analyze	status	OK
+
+## 2. EXPLAIN ohne Index: vollständiger Tabellenscan (type=ALL)
++------+-------------+------------+------+---------------+------+---------+------+--------+-------------+
+| id   | select_type | table      | type | possible_keys | key  | key_len | ref  | rows   | Extra       |
++------+-------------+------------+------+---------------+------+---------+------+--------+-------------+
+|    1 | SIMPLE      | bestellung | ALL  | NULL          | NULL | NULL    | NULL | 199870 | Using where |
++------+-------------+------------+------+---------------+------+---------+------+--------+-------------+
+
+## 3. Die Abfrage ausführen, Dauer messen und im Slow-Query-Log finden
+Query_ID  Duration  Query
+1  0.02118488  select count(*), sum(betrag) from shop.bestellung where kunde_id = 4242
+-- Auszug aus dem Slow-Query-Log (Zeitwerte variieren):
+Query_time: 0.021117 s  select count(*), sum(betrag) from shop.bestellung where kunde_id = 4242;
+
+## 4. Index anlegen und erneut mit EXPLAIN prüfen (type=ref, wenige Zeilen)
++------+-------------+------------+------+---------------+-----------+---------+-------+------+-------+
+| id   | select_type | table      | type | possible_keys | key       | key_len | ref   | rows | Extra |
++------+-------------+------------+------+---------------+-----------+---------+-------+------+-------+
+|    1 | SIMPLE      | bestellung | ref  | idx_kunde     | idx_kunde | 5       | const | 40   |       |
++------+-------------+------------+------+---------------+-----------+---------+-------+------+-------+
+
+## 5. Gelesene Zeilen vergleichen (Handler_read_*, vorher/nachher je Abfrage)
+Handler_read_next	40

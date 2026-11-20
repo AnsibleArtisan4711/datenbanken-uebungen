@@ -1,0 +1,36 @@
+
+## 1. Normalbetrieb
+$ python3 check_datenbank.py mariadb /tmp/p31/demo/s.sock 70 90
+OK - 1 von 10 Verbindungen (10 %) | verbindungen=1;70.0;90.0;0;10
+Rückgabecode: 0
+
+$ python3 check_datenbank.py postgres 5441 70 90
+OK - 1 von 100 Verbindungen (1 %) | verbindungen=1;70.0;90.0;0;100
+Rückgabecode: 0
+
+
+## 2. Auslastung erzwingen: 8 offene MariaDB-Verbindungen bei Limit 10
+$ python3 check_datenbank.py mariadb /tmp/p31/demo/s.sock 70 90
+WARNUNG - 8 von 10 Verbindungen (80 %) | verbindungen=8;70.0;90.0;0;10
+Rückgabecode: 1
+
+$ python3 check_datenbank.py mariadb /tmp/p31/demo/s.sock 90 95
+OK - 8 von 10 Verbindungen (80 %) | verbindungen=8;90.0;95.0;0;10
+Rückgabecode: 0
+
+
+## 3. Dienst gestoppt
+$ python3 check_datenbank.py mariadb /tmp/p31/demo/s.sock 70 90
+KRITISCH - mariadb nicht erreichbar (/tmp/p31/demo/s.sock)
+Rückgabecode: 2
+
+$ python3 check_datenbank.py postgres 5441 70 90
+KRITISCH - postgres nicht erreichbar (5441)
+Rückgabecode: 2
+
+
+## 4. Falscher Aufruf
+$ python3 check_datenbank.py mariadb
+UNBEKANNT - falscher Aufruf
+Rückgabecode: 3
+

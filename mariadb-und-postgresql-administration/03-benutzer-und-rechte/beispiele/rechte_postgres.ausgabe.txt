@@ -1,0 +1,67 @@
+
+## 1. Datenbank, Schema, Tabelle und Rollen anlegen
+CREATE DATABASE
+You are now connected to database "shop" as user "postgres".
+CREATE ROLE
+CREATE ROLE
+CREATE ROLE
+CREATE ROLE
+CREATE SCHEMA
+CREATE TABLE
+INSERT 0 2
+GRANT
+GRANT
+GRANT
+
+## 2. Was dürfen die Rollen?
+-- anna (Mitglied von auswertung): lesen
+ id |    name     |      ort      
+----+-------------+---------------
+  1 | Muster GmbH | Beispielstadt
+  2 | Test AG     | Musterdorf
+(2 rows)
+
+-- anna: schreiben ist verboten
+ERROR:  permission denied for table kunde
+-- app (Mitglied von anwendung): schreiben
+INSERT 0 1
+-- app: Tabelle löschen ist verboten
+ERROR:  must be owner of table kunde
+
+## 3. Das Schema public: seit PostgreSQL 15 dürfen normale Benutzer dort nichts anlegen
+ERROR:  permission denied for schema public
+LINE 1: create table public.t (id int)
+                     ^
+
+## 4. Rechte anzeigen (\dp und Rollenmitgliedschaft)
+                                 Access privileges
+ Schema | Name  | Type  |     Access privileges     | Column privileges | Policies 
+--------+-------+-------+---------------------------+-------------------+----------
+ fach   | kunde | table | postgres=arwdDxt/postgres+|                   | 
+        |       |       | auswertung=r/postgres    +|                   | 
+        |       |       | anwendung=arwd/postgres   |                   | 
+(1 row)
+
+     List of roles
+ Role name | Attributes 
+-----------+------------
+ anna      | 
+
+     List of roles
+ Role name | Attributes 
+-----------+------------
+ app       | 
+
+
+## 5. pg_hba.conf: wer darf sich von wo mit welcher Methode anmelden
+local   all             postgres                                peer
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            scram-sha-256
+host    all             all             ::1/128                 scram-sha-256
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            scram-sha-256
+host    replication     all             ::1/128                 scram-sha-256
+
+## 6. Falsches Kennwort
+psql: error: connection to server at "127.0.0.1", port 5441 failed: FATAL:  password authentication failed for user "anna"
+connection to server at "127.0.0.1", port 5441 failed: FATAL:  password authentication failed for user "anna"

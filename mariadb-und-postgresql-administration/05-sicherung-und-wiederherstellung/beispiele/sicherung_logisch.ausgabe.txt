@@ -1,0 +1,44 @@
+
+## 1. Testdaten anlegen
+
+## 2. MariaDB: mariadb-dump mit --single-transaction (konsistent bei InnoDB, ohne Tabellen zu sperren)
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `shop` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+USE `shop`;
+DROP TABLE IF EXISTS `kunde`;
+CREATE TABLE `kunde` (
+  `id` int(11) NOT NULL,
+  `name` varchar(40) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+INSERT INTO `kunde` VALUES
+(1,'Muster GmbH'),
+(2,'Test AG'),
+(3,'Beispiel KG');
+Zeilen in der Sicherungsdatei: 67
+
+## 3. MariaDB: Datenbank löschen und wiederherstellen
++--------+
+| kunden |
++--------+
+|      3 |
++--------+
+
+## 4. PostgreSQL: pg_dump im Custom-Format (-Fc), danach pg_restore
+Größe der Sicherung: 1628 Bytes
+-- Inhaltsverzeichnis der Sicherung (pg_restore -l, Auszug):
+215; 1259 16385 TABLE public kunde postgres
+3393; 0 16385 TABLE DATA public kunde postgres
+ kunden 
+--------
+      3
+(1 row)
+
+
+## 5. Nur eine Tabelle zurückholen und Rollen/Globale Objekte sichern (pg_dumpall --globals-only)
+ kunden 
+--------
+      3
+(1 row)
+
+CREATE ROLE postgres;
+ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;

@@ -1,0 +1,16 @@
+
+## MariaDB
+  WARNUNG  anonyme Konten vorhanden: 1
+  WARNUNG  Konten mit Host %: alt
+  WARNUNG  Testdatenbank vorhanden: test_alt
+  WARNUNG  TLS nicht verfügbar (have_ssl=DISABLED)
+  OK       lauscht nur auf 127.0.0.1
+  WARNUNG  local_infile an
+
+## PostgreSQL
+  WARNUNG  zusätzliche Superuser: alt
+  WARNUNG  Login-Rollen ohne Kennwort: leer
+  OK       Kennwörter mit scram-sha-256 gespeichert
+  OK       ssl=on
+  OK       keine trust-Regeln für Netzwerkverbindungen
+  OK       lauscht nur auf localhost

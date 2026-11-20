@@ -1,0 +1,31 @@
+
+## 1. Wichtige Statusvariablen
++----------------------+----------------+
+| variable_name        | variable_value |
++----------------------+----------------+
+| ABORTED_CONNECTS     | 0              |
+| CONNECTIONS          | 5              |
+| MAX_USED_CONNECTIONS | 1              |
+| SLOW_QUERIES         | 0              |
+| THREADS_CONNECTED    | 1              |
+| UPTIME               | 0              |
++----------------------+----------------+
+
+## 2. Laufende Verbindungen und Abfragen (SHOW PROCESSLIST)
++--------+------+---------+--------------------------------+
+| hat_id | user | command | info                           |
++--------+------+---------+--------------------------------+
+|      1 | root | Query   | select id > 0 as hat_id, user, |
+|      1 | root | Query   | select sleep(3)                |
++--------+------+---------+--------------------------------+
+
+## 3. Fehlschläge zählen: falsche Anmeldung erhöht Aborted_connects
+Aborted_connects   1
+
+## 4. Verbindungslimit: Auslastung in Prozent
+10.0 % des Limits (20) bisher genutzt
+
+## 5. Fehlerprotokoll (letzte Zeilen, Zeitstempel entfernt)
+[Note] mariadbd: ready for connections.
+Version: '10.11.14-MariaDB-0ubuntu0.24.04.1-log'  socket: '/tmp/p31/demo/s.sock'  port: 3311  Ubuntu 24.04
+[Warning] Access denied for user 'niemand'@'localhost' (using password: YES)

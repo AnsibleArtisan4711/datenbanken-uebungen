@@ -1,0 +1,26 @@
+
+## 1. WAL-Archivierung einschalten (benötigt Neustart) und Basissicherung ziehen
+Basissicherung angelegt: 21 Einträge, backup_label vorhanden: ja
+
+## 2. Weitere Änderungen, benannter Wiederherstellungspunkt, dann der Fehler
+ punkt_gesetzt 
+---------------
+ t
+(1 row)
+
+WAL-Dateien im Archiv: 4 (Anzahl variiert)
+
+## 3. Wiederherstellung: Cluster stoppen, Basissicherung als Datenverzeichnis, Wiederherstellungsziel setzen
+
+## 4. Ergebnis: Stand genau vor dem DROP TABLE
+ id | betrag 
+----+--------
+  1 |  10.00
+  2 |  20.00
+  3 |  30.00
+  4 |  40.00
+(4 rows)
+
+LOG:  recovery stopping at restore point "vor_fehler"
+LOG:  redo done at 0/3000248
+LOG:  archive recovery complete

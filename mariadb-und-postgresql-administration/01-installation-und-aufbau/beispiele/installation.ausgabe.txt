@@ -1,0 +1,43 @@
+
+## 1. Installierte Pakete und Versionen
+  mariadb-server 1:10.11.14-0ubuntu0.24.04.1
+  postgresql-16 16.15-0ubuntu0.24.04.1
+
+## 2. Wichtige Programme
+  mariadbd             /usr/sbin/mariadbd
+  mariadb              /usr/bin/mariadb
+  mariadb-dump         /usr/bin/mariadb-dump
+  mariabackup          /usr/bin/mariabackup
+  mariadb-upgrade      /usr/bin/mariadb-upgrade
+  pg_createcluster     /usr/bin/pg_createcluster
+  pg_ctlcluster        /usr/bin/pg_ctlcluster
+  pg_dump              /usr/bin/pg_dump
+  pg_basebackup        /usr/bin/pg_basebackup
+
+## 3. Standardpfade (Debian/Ubuntu-Pakete)
+  vorhanden: /etc/mysql/my.cnf
+  vorhanden: /etc/mysql/mariadb.conf.d
+  vorhanden: /var/lib/mysql
+  vorhanden: /etc/postgresql/16/main/postgresql.conf
+  vorhanden: /etc/postgresql/16/main/pg_hba.conf
+  vorhanden: /var/lib/postgresql/16/main
+
+## 4. PostgreSQL-Cluster (Debian-Verwaltung mit pg_lsclusters)
+$ pg_lsclusters
+Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 down   postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+
+## 5. Eine MariaDB-Instanz starten und das Prozessmodell ansehen
+MariaDB: ein Prozess (PID vorhanden: ja), Threads: 13 (Wert variiert)
+
+## 6. Einen PostgreSQL-Cluster starten und das Prozessmodell ansehen
+PostgreSQL: Hauptprozess plus Hilfsprozesse:
+  autovacuum launcher 
+  background writer 
+  checkpointer 
+  logical replication launcher 
+  walwriter 
+$ pg_lsclusters
+Ver Cluster Port Status Owner    Data directory              Log file
+16  demo    5441 online postgres /var/lib/postgresql/16/demo /var/log/postgresql/postgresql-16-demo.log
+16  main    5432 down   postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log

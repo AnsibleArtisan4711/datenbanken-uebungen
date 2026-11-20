@@ -1,0 +1,56 @@
+
+## MariaDB
++---------------------------------------+
+| version                               |
++---------------------------------------+
+| 10.11.14-MariaDB-0ubuntu0.24.04.1-log |
++---------------------------------------+
++----------------------+----------------------+
+| Variable_name        | Value                |
++----------------------+----------------------+
+| bind_address         | 127.0.0.1            |
+| character_set_server | latin1               |
+| collation_server     | latin1_swedish_ci    |
+| datadir              | /tmp/p31/demo/data/  |
+| max_connections      | 151                  |
+| port                 | 3311                 |
+| socket               | /tmp/p31/demo/s.sock |
++----------------------+----------------------+
+(Hinweis: Die Zeichensatz-Werte hängen vom Test-Container ab: MariaDB wurde mit --no-defaults gestartet, PostgreSQL erbt die Umgebung (Locale).)
+
+## PostgreSQL
+                                                                 version                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+(1 row)
+
+       data_directory        
+-----------------------------
+ /var/lib/postgresql/16/demo
+(1 row)
+
+ port 
+------
+ 5441
+(1 row)
+
+ server_encoding 
+-----------------
+ SQL_ASCII
+(1 row)
+
+ datname  | datcollate | datctype 
+----------+------------+----------
+ postgres | C          | C
+(1 row)
+
+ max_connections 
+-----------------
+ 100
+(1 row)
+
+ listen_addresses 
+------------------
+ localhost
+(1 row)
+

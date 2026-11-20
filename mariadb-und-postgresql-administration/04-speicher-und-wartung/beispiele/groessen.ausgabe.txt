@@ -1,0 +1,26 @@
+Table	Op	Msg_type	Msg_text
+lager.posten	analyze	status	OK
+Table	Op	Msg_type	Msg_text
+lager.klein	analyze	status	OK
+
+## MariaDB: Größe je Tabelle (Daten + Index) aus information_schema
++---------+----------+----------+
+| tabelle | daten_kb | index_kb |
++---------+----------+----------+
+| posten  |     2576 |      320 |
+| klein   |       16 |        0 |
++---------+----------+----------+
+
+## PostgreSQL: Größe je Datenbank und je Tabelle
+ datname  | groesse 
+----------+---------
+ lager    | 11 MB
+ postgres | 7503 kB
+(2 rows)
+
+ tabelle | tabelle_ohne_index |  indizes   |   gesamt   
+---------+--------------------+------------+------------
+ posten  | 2488 kB            | 912 kB     | 3400 kB
+ klein   | 0 bytes            | 8192 bytes | 8192 bytes
+(2 rows)
+

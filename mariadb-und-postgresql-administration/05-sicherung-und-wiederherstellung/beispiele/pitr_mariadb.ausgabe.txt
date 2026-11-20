@@ -1,0 +1,26 @@
+
+## 1. Daten anlegen und Vollsicherung mit Binärprotokoll-Position (--master-data=2)
+-- CHANGE MASTER TO MASTER_LOG_FILE='binlog.000001', MASTER_LOG_POS=829;
+
+## 2. Danach laufen weitere Änderungen, dann der Fehler (Tabelle versehentlich gelöscht)
+
+## 3. Im Binärprotokoll die Position des DROP TABLE suchen
+Startposition der Sicherung: 829   Position des DROP TABLE: (gefunden: ja)
+
+## 4. Wiederherstellung: Vollsicherung einspielen, dann das Protokoll von der Startposition bis vor den Fehler
+Nach der Vollsicherung:
++----+--------+
+| id | betrag |
++----+--------+
+|  1 |  10.00 |
+|  2 |  20.00 |
++----+--------+
+Nach dem Einspielen des Protokolls bis vor den Fehler:
++----+--------+
+| id | betrag |
++----+--------+
+|  1 |  10.00 |
+|  2 |  20.00 |
+|  3 |  30.00 |
+|  4 |  40.00 |
++----+--------+

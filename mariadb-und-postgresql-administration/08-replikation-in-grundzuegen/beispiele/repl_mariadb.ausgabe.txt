@@ -1,0 +1,38 @@
+
+## 1. Primär: Benutzer für die Replikation, Testdaten
++------------------+-------+
+| Variable_name    | Value |
++------------------+-------+
+| binlog_format    | MIXED |
+| gtid_strict_mode | OFF   |
+| log_bin          | ON    |
+| server_id        | 1     |
++------------------+-------+
+
+## 2. Replikat: auf den Primär zeigen lassen und starten (gtid_slave_pos, MariaDB-GTID)
+Slave_IO_Running: Yes
+Slave_SQL_Running: Yes
+Last_Error: 
+Seconds_Behind_Master: 0
+Last_IO_Error: 
+Last_SQL_Error: 
+Using_Gtid: Slave_Pos
+
+## 3. Änderung auf dem Primär, Kontrolle auf dem Replikat
++----+-------------+
+| id | name        |
++----+-------------+
+|  1 | Muster GmbH |
+|  2 | Test AG     |
+|  3 | Beispiel KG |
++----+-------------+
+-- Schreiben auf dem Replikat ist möglich, aber nicht erwünscht: read_only schützt davor (nicht für Benutzer mit SUPER/READ_ONLY ADMIN)
+1
+
+## 4. GTID-Position vergleichen
+Primär  gtid_binlog_pos: 0-1-6
+Replikat gtid_slave_pos:  0-1-6
+
+## 5. Fehlerbild: Replikat stoppen, Primär schreibt weiter, Verzögerung entsteht, Replikat holt auf
+Replikat ohne laufende Replikation: 3 Zeilen; Primär: 5 Zeilen
+Replikat nach start slave: 5 Zeilen

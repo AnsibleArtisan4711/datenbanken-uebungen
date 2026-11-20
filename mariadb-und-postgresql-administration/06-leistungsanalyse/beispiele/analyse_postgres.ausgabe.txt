@@ -1,0 +1,29 @@
+
+## 1. EXPLAIN ohne Index: sequentieller Scan (Seq Scan), Zeitwerte variieren
+                                         QUERY PLAN                                          
+---------------------------------------------------------------------------------------------
+ Aggregate  (cost=3774.20..3774.21 rows=1 width=40) (actual rows=1 loops=1)
+   ->  Seq Scan on bestellung  (cost=0.00..3774.00 rows=40 width=6) (actual rows=40 loops=1)
+         Filter: (kunde_id = 4242)
+         Rows Removed by Filter: 199960
+(4 rows)
+
+
+## 2. Index anlegen und erneut prüfen (Index Scan oder Bitmap Heap Scan)
+                                               QUERY PLAN                                               
+--------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=144.04..144.05 rows=1 width=40) (actual rows=1 loops=1)
+   ->  Bitmap Heap Scan on bestellung  (cost=4.60..143.84 rows=40 width=6) (actual rows=40 loops=1)
+         Recheck Cond: (kunde_id = 4242)
+         Heap Blocks: exact=40
+         ->  Bitmap Index Scan on idx_kunde  (cost=0.00..4.59 rows=40 width=0) (actual rows=40 loops=1)
+               Index Cond: (kunde_id = 4242)
+(6 rows)
+
+
+## 3. pg_stat_statements: die teuersten Anweisungen (Ausführungen, Gesamtzeit gerundet)
+ calls | hat_zeit | rows |                           abfrage                            
+-------+----------+------+--------------------------------------------------------------
+     3 | t        |    3 | select count(*), sum(betrag) from bestellung where kunde_id 
+(1 row)
+

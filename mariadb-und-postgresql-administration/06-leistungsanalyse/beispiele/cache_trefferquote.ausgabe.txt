@@ -1,0 +1,17 @@
+
+## MariaDB: Pufferpool absichtlich klein (8 MB); die Zähler gelten seit dem Start, also inklusive des Befüllens der Tabelle
++----------------------------------+----------------+
+| variable_name                    | variable_value |
++----------------------------------+----------------+
+| INNODB_BUFFER_POOL_READ_REQUESTS | 463512         |
+| INNODB_BUFFER_POOL_READS         | 2871           |
++----------------------------------+----------------+
+Trefferquote: 99.36 %
+
+## PostgreSQL: Trefferquote je Datenbank aus pg_stat_database
+ datname | blks_hit | blks_read | trefferquote_prozent
+---------+----------+-----------+----------------------
+ shop    |   608974 |         1 |               100.00
+(1 row)
+
+(Die Zahlen hängen von der Größe des Caches und vom Ablauf ab; Zielwerte hängen von der Anwendung ab, ein fester Grenzwert wird hier nicht behauptet.)

@@ -1,0 +1,32 @@
+
+## 1. MariaDB: Versionen und mariadb-upgrade (prüft und aktualisiert Systemtabellen)
+10.11.14-MariaDB-0ubuntu0.24.04.1-log
+This installation of MariaDB is already upgraded to 10.11.14-MariaDB.
+There is no need to run mysql_upgrade again.
+You can use --force if you still want to run mysql_upgrade
+Upgrade-Info-Datei: 10.11.14-MariaDB
+
+## 2. PostgreSQL: Cluster und installierte Programmversionen
+Ver Cluster Port Status Owner    Data directory              Log file
+16  alt     5441 online postgres /var/lib/postgresql/16/alt  /var/log/postgresql/postgresql-16-alt.log
+16  neu     5442 online postgres /var/lib/postgresql/16/neu  /var/log/postgresql/postgresql-16-neu.log
+16
+
+## 3. PostgreSQL: Daten von Cluster alt (Port 5441) nach Cluster neu (Port 5442) per Dump und Restore
+ kunden 
+--------
+      2
+(1 row)
+
+
+## 4. Nach dem Wechsel: ANALYZE ausführen (Planer-Statistiken werden bei Dump/Restore nicht mit übernommen)
+ analyze_gelaufen 
+------------------
+ f
+(1 row)
+
+ analyze_gelaufen 
+------------------
+ t
+(1 row)
+

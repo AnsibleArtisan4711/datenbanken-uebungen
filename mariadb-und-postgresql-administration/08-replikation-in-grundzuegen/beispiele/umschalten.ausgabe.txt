@@ -1,0 +1,25 @@
+
+## MariaDB 1. Replikation einrichten, Testdaten
+Replikat hat 2 Zeilen
+
+## MariaDB 2. Ausfall des Primärs, Replikat zum neuen Primär machen
+Neuer Primär hat 3 Zeilen und nimmt Schreibvorgänge an.
+Wichtig: Anwendungen müssen auf die neue Adresse umgestellt werden; der alte Primär darf nicht unkontrolliert wieder starten (zwei Primärserver = Split-Brain).
+
+## PostgreSQL 1. Standby einrichten
+Standby im Wiederherstellungsmodus: t
+
+## PostgreSQL 2. Ausfall des Primärs, Standby befördern (pg_promote)
+ pg_promote 
+------------
+ t
+(1 row)
+
+im Wiederherstellungsmodus: false
+INSERT 0 1
+ zeilen 
+--------
+      3
+(1 row)
+
+Zeitleiste (timeline) des neuen Primärs: 2 (vor der Umschaltung: 1)

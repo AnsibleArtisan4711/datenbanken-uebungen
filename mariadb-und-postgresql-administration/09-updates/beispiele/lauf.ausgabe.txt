@@ -1,0 +1,32 @@
+postgresql  16.4     -> 16.15   : Minor-Update
+      1. Release-Hinweise lesen
+      2. Sicherung anlegen und Wiederherstellung kennen
+      3. Paket aktualisieren, Dienst neu starten
+      4. Prüfen: Version, Fehlerprotokoll, Anwendung
+postgresql  16.15    -> 17.2    : Major-Update
+      1. Release-Hinweise und Inkompatibilitäten lesen
+      2. Sicherung anlegen und Wiederherstellung testen
+      3. Update in einer Kopie der Umgebung üben
+      4. Daten umstellen (Dump/Restore, pg_upgrade bzw. mariadb-upgrade)
+      5. Statistiken neu erzeugen, Anwendung testen
+      6. Rückfallplan: alte Version und Sicherung bis zur Abnahme behalten
+postgresql  9.6.24   -> 10.5    : Major-Update
+      1. Release-Hinweise und Inkompatibilitäten lesen
+      2. Sicherung anlegen und Wiederherstellung testen
+      3. Update in einer Kopie der Umgebung üben
+      4. Daten umstellen (Dump/Restore, pg_upgrade bzw. mariadb-upgrade)
+      5. Statistiken neu erzeugen, Anwendung testen
+      6. Rückfallplan: alte Version und Sicherung bis zur Abnahme behalten
+mariadb     10.11.8  -> 10.11.14: Minor-Update
+      1. Release-Hinweise lesen
+      2. Sicherung anlegen und Wiederherstellung kennen
+      3. Paket aktualisieren, Dienst neu starten
+      4. Prüfen: Version, Fehlerprotokoll, Anwendung
+mariadb     10.11.14 -> 11.4.3  : Major-Update
+      1. Release-Hinweise und Inkompatibilitäten lesen
+      2. Sicherung anlegen und Wiederherstellung testen
+      3. Update in einer Kopie der Umgebung üben
+      4. Daten umstellen (Dump/Restore, pg_upgrade bzw. mariadb-upgrade)
+      5. Statistiken neu erzeugen, Anwendung testen
+      6. Rückfallplan: alte Version und Sicherung bis zur Abnahme behalten
+mariadb     11.4.3   -> 10.11.14: Downgrade (nicht vorgesehen)

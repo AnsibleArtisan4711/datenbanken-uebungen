@@ -1,0 +1,40 @@
+
+## 1. Tabelle mit 60000 Zeilen; Autovacuum für diese Tabelle abschalten, damit der Ablauf sichtbar bleibt
+ tabellengroesse | lebend | tot 
+-----------------+--------+-----
+ 11 MB           |  60000 |   0
+(1 row)
+
+
+## 2. 80 % der Zeilen löschen: Zeilen werden nur als tot markiert, die Datei bleibt gleich groß
+ tabellengroesse | lebend |  tot  
+-----------------+--------+-------
+ 11 MB           |  12000 | 48000
+(1 row)
+
+
+## 3. VACUUM gibt den Platz innerhalb der Datei zur Wiederverwendung frei (Datei wird meist nicht kleiner)
+VACUUM
+ tabellengroesse | lebend | tot 
+-----------------+--------+-----
+ 11 MB           |  12000 |   0
+(1 row)
+
+
+## 4. VACUUM FULL schreibt die Tabelle neu und verkleinert die Datei (sperrt die Tabelle exklusiv)
+VACUUM
+ tabellengroesse | lebend | tot 
+-----------------+--------+-----
+ 2344 kB         |  12000 |   0
+(1 row)
+
+
+## 5. Autovacuum: Einstellungen
+              name              | setting 
+--------------------------------+---------
+ autovacuum                     | on
+ autovacuum_naptime             | 60
+ autovacuum_vacuum_scale_factor | 0.2
+ autovacuum_vacuum_threshold    | 50
+(4 rows)
+
