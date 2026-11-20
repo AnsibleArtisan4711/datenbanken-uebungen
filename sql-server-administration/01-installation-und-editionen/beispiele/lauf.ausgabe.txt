@@ -1,0 +1,33 @@
+## Lernlabor, 5 GB, 2 Kerne, nicht produktiv
+  Enterprise             passt (Grenzen nicht gelesen)
+  Standard               passt (Grenzen nicht gelesen)
+  Enterprise Developer   passt (Grenzen nicht gelesen)
+  Standard Developer     passt (Grenzen nicht gelesen)
+  Evaluation             passt (Grenzen nicht gelesen)
+  Express                passt
+
+## Kleine Firma, 30 GB, 4 Kerne, produktiv
+  Enterprise             passt (Grenzen nicht gelesen)
+  Standard               passt (Grenzen nicht gelesen)
+  Enterprise Developer   passt nicht: nicht für den Produktivbetrieb
+  Standard Developer     passt nicht: nicht für den Produktivbetrieb
+  Evaluation             passt nicht: nicht für den Produktivbetrieb
+  Express                passt
+
+## Abteilung, 200 GB, 16 Kerne, produktiv
+  Enterprise             passt (Grenzen nicht gelesen)
+  Standard               passt (Grenzen nicht gelesen)
+  Enterprise Developer   passt nicht: nicht für den Produktivbetrieb
+  Standard Developer     passt nicht: nicht für den Produktivbetrieb
+  Evaluation             passt nicht: nicht für den Produktivbetrieb
+  Express                passt nicht: Datenbank 200 GB über Grenze 50 GB; 16 Kerne über Grenze 4
+
+## Großes System, 2000 GB, 48 Kerne, produktiv
+  Enterprise             passt (Grenzen nicht gelesen)
+  Standard               passt nicht: 48 Kerne über Grenze 32
+  Enterprise Developer   passt nicht: nicht für den Produktivbetrieb
+  Standard Developer     passt nicht: nicht für den Produktivbetrieb; 48 Kerne über Grenze 32
+  Evaluation             passt nicht: nicht für den Produktivbetrieb
+  Express                passt nicht: Datenbank 2000 GB über Grenze 50 GB; 48 Kerne über Grenze 4
+
+Hinweis: Die Tabelle ist unvollständig (Enterprise-Grenzen und weitere Funktionsunterschiede wurden nicht gelesen).

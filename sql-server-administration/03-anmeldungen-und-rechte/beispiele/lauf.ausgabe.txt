@@ -1,0 +1,6 @@
+7 Zeilen gelesen
+  sa                 Konto `sa` ist aktiv (üblich: umbenennen oder deaktivieren)
+  app_shop           SQL-Anmeldung ohne Kennwortrichtlinie
+  app_shop           `db_owner` in ShopDB: volle Rechte in der Datenbank (prüfen, ob nötig)
+  (Rolle sysadmin)   4 Anmeldungen mit sysadmin: LAB\admin-carla, LAB\dba-anna, LAB\dba-bernd, sa (Annahme: höchstens 2 nötig)
+-> 4 Hinweis(e)

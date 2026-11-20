@@ -1,0 +1,8 @@
+anmeldung,typ,aktiv,serverrolle,datenbank,datenbankrolle,kennwortrichtlinie
+sa,sql,ja,sysadmin,-,-,ja
+LAB\dba-anna,windows,ja,sysadmin,-,-,ja
+LAB\dba-bernd,windows,ja,sysadmin,-,-,ja
+LAB\admin-carla,windows,ja,sysadmin,-,-,ja
+app_shop,sql,ja,-,ShopDB,db_owner,nein
+app_report,sql,ja,-,ShopDB,db_datareader,ja
+LAB\gruppe-lesen,windows,ja,-,ShopDB,db_datareader,ja

@@ -1,0 +1,11 @@
+8 Zeilen, davon 2 Hintergrund-Waits ignoriert; Summe der übrigen Wartezeit 929000 ms
+
+Wait-Typ                      ms  Anteil   Anzahl  ms/Wait  Deutung
+PAGEIOLATCH_SH            482000    52%    91000      5.3  wartet auf Lesen von Datenseiten von der Platte (Speicher-Leistung, fehlende Indizes, zu wenig RAM)
+WRITELOG                  215000    23%   430000      0.5  wartet auf Schreiben ins Transaktionsprotokoll (Platte des Protokolls, sehr viele kleine Transaktionen)
+LCK_M_X                   128000    14%      950    134.7  wartet auf eine Sperre (Blockierung durch andere Sitzung)
+SOS_SCHEDULER_YIELD        64000     7%   520000      0.1  CPU-Druck: Aufgaben warten auf Rechenzeit
+CXPACKET                   31000     3%     8000      3.9  Wartezeit bei paralleler Ausführung (Parallelität, Pläne prüfen)
+ASYNC_NETWORK_IO            9000     1%    12000      0.8  Client holt Ergebnisse langsam ab (Anwendung oder Netzwerk)
+
+Hinweis: Wait-Statistiken zeigen Symptome, keine Ursache; sie gelten seit dem letzten Start der Instanz (Fachwissen, nicht bestätigt).

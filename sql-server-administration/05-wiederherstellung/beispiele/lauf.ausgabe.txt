@@ -1,0 +1,24 @@
+## Ziel: 17.11.2026 09:00
+  1. Protokollfragment sichern (BACKUP LOG ... WITH NORECOVERY), falls die Datenbank noch erreichbar ist
+  2. RESTORE DATABASE aus voll_so.bak WITH NORECOVERY
+  3. RESTORE DATABASE aus diff_di.bak WITH NORECOVERY
+  4. RESTORE LOG aus log_001.trn WITH NORECOVERY
+  5. RESTORE LOG aus log_002.trn WITH NORECOVERY, STOPAT '2026-11-17 09:00'
+  6. RESTORE DATABASE ... WITH RECOVERY
+
+## Ziel: 17.11.2026 20:00
+  1. Protokollfragment sichern (BACKUP LOG ... WITH NORECOVERY), falls die Datenbank noch erreichbar ist
+  2. RESTORE DATABASE aus voll_so.bak WITH NORECOVERY
+  3. RESTORE DATABASE aus diff_di.bak WITH NORECOVERY
+  4. RESTORE LOG aus log_001.trn WITH NORECOVERY
+  5. RESTORE LOG aus log_002.trn WITH NORECOVERY
+  6. RESTORE DATABASE ... WITH RECOVERY
+  !! LÜCKE: nach log_002 fehlt log_003; Wiederherstellung nur bis 17.11. 10:00
+
+## Ziel: 16.11.2026 12:00
+  1. Protokollfragment sichern (BACKUP LOG ... WITH NORECOVERY), falls die Datenbank noch erreichbar ist
+  2. RESTORE DATABASE aus voll_so.bak WITH NORECOVERY
+  3. RESTORE DATABASE aus diff_mo.bak WITH NORECOVERY
+  4. RESTORE LOG aus log_001.trn WITH NORECOVERY, STOPAT '2026-11-16 12:00'
+  5. RESTORE DATABASE ... WITH RECOVERY
+

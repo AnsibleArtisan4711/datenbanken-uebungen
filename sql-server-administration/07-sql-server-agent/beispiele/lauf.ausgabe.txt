@@ -1,0 +1,7 @@
+Stand (angenommen): Fri 20.11.2026 08:15
+Auftrag                    Intervall     nächster Lauf      Hinweise
+Vollsicherung              woechentlich  22.11. 22:00       
+Differenzsicherung         taeglich      20.11. 22:00       
+Protokollsicherung         stuendlich    20.11. 09:15       keine Benachrichtigung bei Fehler
+Konsistenzpruefung         woechentlich  21.11. 23:30       
+Alter Importjob            taeglich      -                  deaktiviert

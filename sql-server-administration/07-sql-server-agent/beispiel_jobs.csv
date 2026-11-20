@@ -1,0 +1,6 @@
+auftrag,intervall,start,wochentag,aktiv,benachrichtigung
+Vollsicherung,woechentlich,22:00,So,ja,ja
+Differenzsicherung,taeglich,22:00,-,ja,ja
+Protokollsicherung,stuendlich,00:15,-,ja,nein
+Konsistenzpruefung,woechentlich,23:30,Sa,ja,ja
+Alter Importjob,taeglich,03:00,-,nein,nein

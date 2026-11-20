@@ -7,6 +7,7 @@ Praxisübungen zu relationalen Datenbanken mit PostgreSQL im isolierten Labor. J
 | Ordner | Thema | Stand |
 |---|---|---|
 | [`sql-grundlagen/`](sql-grundlagen/) | SQL-Grundlagen (P30): 12 Module, 90 Stunden | Entwurf, SQL und Serverbefehle in einer Testumgebung (PostgreSQL 16) ausgeführt, Hyper-V, Debian 12 und DBeaver nicht |
+| [`sql-server-administration/`](sql-server-administration/) | SQL Server Administration (P32): 10 Module, 108 Unterrichtseinheiten | Entwurf, Python-Modelle im Container ausgeführt, SQL Server und die T-SQL-Beispiele nicht ausgeführt |
 
 ## Lizenz
 

@@ -1,0 +1,7 @@
+Wachstum 10 %        :   73 Vergrößerungen von 100 MB auf 100000 MB; kleinster Schritt 10 MB, größter 9556 MB
+Wachstum 256 MB fest :  391 Vergrößerungen von 100 MB auf 100000 MB; kleinster Schritt 256 MB, größter 256 MB
+Wachstum 1024 MB fest:   98 Vergrößerungen von 100 MB auf 100000 MB; kleinster Schritt 1024 MB, größter 1024 MB
+
+Bewertung (Fachwissen, nicht bestätigt): Viele kleine Schritte bedeuten viele Wartezeiten bei Schreibvorgängen und Fragmentierung;
+Prozentwachstum führt bei großen Dateien zu sehr großen Schritten. Eine feste, vernünftig gewählte Größe und regelmäßiges Vorab-Vergrößern sind üblich.
+Hinweis: Das Modell kennt weder Sofort-Initialisierung noch Protokolldateien (dort wirkt das Wachstum anders).

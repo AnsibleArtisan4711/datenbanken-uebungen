@@ -1,0 +1,15 @@
+ Verfügbarkeit   Ausfall pro Jahr
+         99.0%       87.6 h =    5256 min
+         99.9%        8.8 h =     526 min
+        99.95%        4.4 h =     263 min
+        99.99%        0.9 h =      53 min
+
+Serielle Abhängigkeit: Gesamtverfügbarkeit = Produkt der Einzelwerte (Annahme: unabhängige Ausfälle)
+  99.9% x 99.9%              = 99.80% -> 17.5 h/Jahr
+  99.9% x 99.9% x 99.5%      = 99.30% -> 61.2 h/Jahr
+
+Verfahren                            Wirkung                                                  Hinweis
+Sicherung und Wiederherstellung      Schutz vor Datenverlust, langer Ausfall                  Grundlage, ersetzt nichts
+Log Shipping                         Sicherungskopie auf zweitem Server, Umschaltung von Hand Verzögerung durch Intervall
+Failover-Cluster-Instanz             Instanz zieht auf anderen Knoten um, gemeinsamer Speicher braucht Windows-Cluster
+Always On Verfügbarkeitsgruppe       Datenbanken werden auf Replikate synchronisiert          Edition und Lizenz prüfen

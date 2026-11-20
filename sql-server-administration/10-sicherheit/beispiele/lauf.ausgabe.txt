@@ -1,0 +1,10 @@
+OFFEN [hoch  ] Konto sa deaktiviert oder umbenannt
+OK   [mittel] Windows-Authentifizierung bevorzugt
+OFFEN [hoch  ] Verbindungen verschlüsselt (Zertifikat)
+OFFEN [mittel] Datenbank verschlüsselt (z. B. TDE) oder Datenträger verschlüsselt
+OK   [hoch  ] Sicherungen verschlüsselt oder an geschütztem Ort
+OFFEN [mittel] Anmeldungen und Rechteänderungen werden protokolliert (nicht geprüft)
+OK   [hoch  ] Aktualisierungen innerhalb von 30 Tagen eingespielt (Annahme)
+OK   [hoch  ] Dienstkonto ohne Administratorrechte
+
+4 von 8 Punkten offen; Reihenfolge der Behebung: zuerst Risiko hoch.

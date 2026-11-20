@@ -1,0 +1,10 @@
+SIMPLE       Protokollsicherung: nein  Zeitpunkt: eingeschränkt/nein  -> Protokoll wird automatisch gekürzt; nur Voll- und Differenz-Sicherungen; Wiederherstellung nur auf den Sicherungszeitpunkt
+FULL         Protokollsicherung: ja  Zeitpunkt: ja  -> Protokoll bleibt bis zur Protokollsicherung; Wiederherstellung auf einen Zeitpunkt möglich
+BULK_LOGGED  Protokollsicherung: ja  Zeitpunkt: eingeschränkt/nein  -> wie FULL, aber Massenvorgänge minimal protokolliert; Zeitpunkt-Wiederherstellung eingeschränkt (Fachwissen)
+
+## Verlustzeit und Volumen (erfundene Zahlen: Datenbank 200 GB, Änderungen 5 GB/Tag, Protokoll 0,4 GB/Stunde)
+Strategie                                     max. Verlust  Volumen/Woche GB
+FULL täglich (SIMPLE)                                 24 h              1400
+FULL wöchentlich + DIFF täglich (SIMPLE)              24 h               260
+FULL wöchentlich + DIFF täglich + LOG alle 15 Min        15 Min               327
+Hinweis: Die DIFF-Größe wächst im Modell nicht über die Woche (vereinfacht: 2 × Tageszuwachs je Tag).
