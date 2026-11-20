@@ -1,0 +1,22 @@
+
+## 1. Dump erzeugen, komprimieren und Größen vergleichen
+komprimiert kleiner als Klartext: ja
+
+## 2. Mit age verschlüsseln (Schlüsselpaar erzeugen, nur öffentlicher Schlüssel auf dem Sicherungsserver)
+Klartext 'CREATE TABLE' in der verschlüsselten Datei: 0
+
+## 3. Entschlüsseln, entpacken und die Prüfsumme gegen das Original vergleichen
+Prüfsumme gleich: ja
+
+## 4. Falscher Schlüssel (anderes Schlüsselpaar) kann nicht entschlüsseln
+age: error: no identity matched any of the recipients
+
+## 5. Aufbewahrung nach Generationen (täglich 7, wöchentlich 4, monatlich 3), 120 Tagesdateien als Modell
+Dateien: 120, behalten: 11, löschbar: 109
+Älteste behaltene Datei: 2026-09-30
+Jüngste löschbare Datei: 2026-11-13
+
+## 6. Hinweise (Text)
+Der private Schlüssel gehört nicht auf den Sicherungsserver und braucht eine eigene, getrennte Sicherung.
+Ohne den privaten Schlüssel sind die Sicherungen unbrauchbar.
+Die Aufbewahrungsregeln sind ein Beispiel; rechtliche Fristen wurden nicht geprüft.

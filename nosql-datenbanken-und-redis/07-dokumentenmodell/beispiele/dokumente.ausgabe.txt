@@ -1,0 +1,32 @@
+
+## 1. Dokumente verschieden aufgebaut (flexible Felder): Anzahl und Felder je Dokument
+  _id=1 Felder: _id, adresse, alter, name, tags
+  _id=2 Felder: _id, adresse, alter, name
+  _id=3 Felder: _id, adresse, alter, name, newsletter
+
+## 2. Suchen mit Gleichheit, Vergleich und Liste
+alter > 30 -> ["Anna", "Cara"]
+ort = Musterstadt -> ["Anna", "Cara"]
+name in [Ben, Cara] -> ["Ben", "Cara"]
+
+## 3. Projektion (nur bestimmte Felder, auch verschachtelt)
+name, adresse.plz -> [{"name": "Anna", "adresse.plz": "12345"}, {"name": "Ben", "adresse.plz": null}, {"name": "Cara", "adresse.plz": null}]
+
+## 4. Ändern (auch verschachtelt) und fehlende Felder
+  geändert: 1
+Ben -> {"ort": "Beispielort", "plz": "54321"}
+newsletter vorhanden (Wert nicht None) -> ["Ben", "Cara"]
+
+## 5. Operator, den das Modell nicht kennt
+  Fehler: Operator nicht im Modell: $regex
+
+## 6. Gegenüberstellung mit dem relationalen Modell (Text)
+Relational: feste Spalten, Verknüpfungen (JOIN), Schema im Voraus, starke Konsistenzregeln
+Dokument  : Daten eines Objekts zusammen in einem Dokument, flexible Felder; Verknüpfungen sind aufwendiger
+Nicht ausgeführt: MongoDB, Indizes, Aggregation, Transaktionen, Replikation von Dokumentendatenbanken
+
+## 7. Beispielbefehle (Datei, nicht ausgeführt)
+// NICHT AUSGEFÜHRT, nicht gegen die Dokumentation geprüft (Syntax aus Fachwissen, kann abweichen)
+db.kunden.insertOne({ name: "Anna", alter: 31, adresse: { ort: "Musterstadt" } })
+db.kunden.find({ alter: { $gt: 30 } }, { name: 1 })
+db.kunden.updateOne({ name: "Ben" }, { $set: { "adresse.plz": "54321" } })

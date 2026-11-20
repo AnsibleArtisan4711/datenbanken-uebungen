@@ -1,0 +1,31 @@
+
+## 1. pg_dump in vier Formaten (Datei, Custom, Verzeichnis mit 2 Prozessen, tar)
+shop.sql   ASCII text
+shop.dump  PostgreSQL custom database dump
+shop.dir   Verzeichnis
+shop.tar   POSIX tar archive
+Custom kleiner als Klartext: ja
+
+## 2. Inhaltsverzeichnis einer Sicherung lesen (pg_restore -l): Anzahl Tabellen und Daten-Einträge
+Einträge TABLE DATA: 2
+  Tabelle bestellungen, Eigentümer postgres
+  Tabelle kunden, Eigentümer postgres
+
+## 3. Nur Schema und nur Daten
+CREATE TABLE im Schema-Dump: 2
+COPY im Schema-Dump: 0
+COPY im Daten-Dump: 2
+
+## 4. Nur eine Tabelle zurückholen (pg_restore -t) in eine neue Datenbank
+Zeilen in teil.kunden: 500
+
+## 5. MariaDB: mariadb-dump mit Optionen
+CREATE TABLE: 2
+INSERT-Anweisungen: 2
+INSERT bei --no-data: 0
+INSERT-Anweisungen mit Filter (kunde_id<=10): 1
+
+## 6. Hinweise (Text)
+--single-transaction liefert nur bei transaktionalen Tabellen (InnoDB) einen konsistenten Stand ohne Sperren.
+pg_dump liest in einer einzigen Transaktion; ein Dump ist ein Stand zum Beginn des Dumps.
+Dumps enthalten keine Rollen: pg_dumpall --globals-only (siehe Übungsreihe MariaDB und PostgreSQL Administration).

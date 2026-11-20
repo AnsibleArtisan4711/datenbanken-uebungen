@@ -1,0 +1,40 @@
+
+## 1. Ohne Schutz: jeder, der den Port erreicht, darf alles (hier nur Loopback)
+Bindung: bind 127.0.0.1 
+> set a 1
+OK
+requirepass: '' (leer = kein Kennwort)
+
+## 2. Kennwort setzen (requirepass): Zugriff ohne Anmeldung wird abgelehnt
+> get a
+(error) NOAUTH Authentication required.
+> auth (mit Kennwort)
+1
+
+## 3. ACL-Benutzer mit eingeschränkten Rechten: nur Lesen auf Schlüssel mit Präfix kunde:
+Benutzer leser angelegt
+> (als leser) ping
+PONG
+> (als leser) get kunde:1
+"anna"
+> (als leser) get intern:1
+(error) NOPERM this user has no permissions to access one of the keys used as arguments
+> (als leser) set kunde:2 x
+(error) NOPERM this user has no permissions to run the 'set' command
+> (als leser) flushall
+(error) NOPERM this user has no permissions to run the 'flushall' command
+
+## 4. Rechte anzeigen (ohne Kennwort-Hashes)
+flags
+on
+commands
+-@all +ping +get +hget
+keys
+~kunde:*
+
+## 5. Hinweise (Text)
+Redis nicht an öffentliche Adressen binden; Zugriff über Firewall begrenzen.
+Kennwörter in der Konfiguration sind nur so sicher wie die Dateirechte der Konfigurationsdatei.
+Gefährliche Befehle (FLUSHALL, CONFIG) nur für Verwaltungsbenutzer erlauben.
+Kennwörter als Argument (`--pass`) sind in der Prozessliste sichtbar (siehe Übungsreihe Passwort- und Secrets-Verwaltung); hier nur erfundene Werte.
+Verschlüsselung der Verbindung (TLS) wurde nicht ausgeführt.

@@ -1,0 +1,86 @@
+
+## 1. Zeichenketten und Zähler (atomar)
+> set zaehler 10
+OK
+> incr zaehler
+(integer) 11
+> incrby zaehler 5
+(integer) 16
+> get zaehler
+"16"
+> type zaehler
+string
+
+## 2. Liste (Warteschlange): hinten anfügen, vorne entnehmen
+> rpush auftraege a1 a2 a3
+(integer) 3
+> lpop auftraege
+"a1"
+> lrange auftraege 0 -1
+1) "a2"
+2) "a3"
+> llen auftraege
+(integer) 2
+> type auftraege
+list
+
+## 3. Hash (Objekt mit Feldern)
+> hset kunde:1 name Anna ort Musterstadt alter 31
+(integer) 3
+> hget kunde:1 ort
+"Musterstadt"
+> hgetall kunde:1
+1) "name"
+2) "Anna"
+3) "ort"
+4) "Musterstadt"
+5) "alter"
+6) "31"
+> hincrby kunde:1 alter 1
+(integer) 32
+> type kunde:1
+hash
+
+## 4. Menge (eindeutige Elemente) und Mengenoperationen
+> sadd tags:a rot gruen blau
+(integer) 3
+> sadd tags:b blau gelb
+(integer) 2
+> sadd tags:a rot
+(integer) 0
+> sinter tags:a tags:b
+1) "blau"
+> sunion tags:a tags:b (sortiert)
+blau gelb gruen rot 
+> scard tags:a
+(integer) 3
+
+## 5. Sortierte Menge (Rangliste)
+> zadd rang 120 anna 95 ben 150 cara
+(integer) 3
+> zrange rang 0 -1 withscores
+1) "ben"
+2) "95"
+3) "anna"
+4) "120"
+5) "cara"
+6) "150"
+> zrevrange rang 0 0
+1) "cara"
+> zrank rang ben
+(integer) 0
+> zincrby rang 60 ben
+"155"
+> zrevrange rang 0 0
+1) "ben"
+
+## 6. Falscher Typ liefert einen Fehler
+> lpush zaehler x
+(error) WRONGTYPE Operation against a key holding the wrong kind of value
+
+## 7. Wann welcher Typ? (Text)
+Zeichenkette: Einzelwert, Zähler, Zwischenspeicher
+Liste       : Warteschlange, neueste Einträge
+Hash        : Objekt mit Feldern (zum Beispiel Benutzerprofil)
+Menge       : Eindeutigkeit, Schnitt und Vereinigung (Markierungen)
+Sortiert    : Ranglisten, nach Punktzahl sortiert

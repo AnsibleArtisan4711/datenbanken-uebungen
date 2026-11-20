@@ -1,0 +1,23 @@
+
+## 1. Ohne Persistenz: nach dem Neustart sind die Daten weg
+vor Neustart: 1 Schlüssel
+nach Neustart: 0 Schlüssel
+
+## 2. RDB: Abbild mit SAVE schreiben, Datei prüfen, Neustart
+> save
+OK
+Dateien dump.rdb: 1
+nach Neustart (Abbild wird geladen): 1 Schlüssel, b=2
+
+## 3. Änderungen nach dem letzten Abbild gehen bei hartem Ende verloren
+c nach hartem Ende: '' (leer = verloren), b=2
+
+## 4. AOF: jeder Schreibbefehl wird protokolliert (appendfsync always)
+AOF-Dateien vorhanden: 3
+Befehle im Protokoll (Zeilen mit SET oder INCR): 3
+nach hartem Ende: x=2 y=2
+
+## 5. Vergleich (Text)
+RDB : kompakte Abbilder in Abständen, schnell zu laden, Änderungen seit dem letzten Abbild gehen verloren
+AOF : Protokoll aller Schreibbefehle, kleinere Verlustspanne, größere Datei, langsamerer Neustart
+Beides ersetzt keine Datensicherung auf ein anderes System.

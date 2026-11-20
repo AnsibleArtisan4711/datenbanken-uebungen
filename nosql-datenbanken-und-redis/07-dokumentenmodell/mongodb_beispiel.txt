@@ -1,0 +1,4 @@
+// NICHT AUSGEFÜHRT, nicht gegen die Dokumentation geprüft (Syntax aus Fachwissen, kann abweichen)
+db.kunden.insertOne({ name: "Anna", alter: 31, adresse: { ort: "Musterstadt" } })
+db.kunden.find({ alter: { $gt: 30 } }, { name: 1 })
+db.kunden.updateOne({ name: "Ben" }, { $set: { "adresse.plz": "54321" } })

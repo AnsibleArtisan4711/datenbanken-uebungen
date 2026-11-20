@@ -1,0 +1,33 @@
+
+## 1. Erster Lauf: alle drei Sicherungen
+Rückgabecode: 0
+OK      postgres-shop
+OK      maria-shop
+OK      sqlite-app
+GESAMT  ok
+Sicherungsdateien: 3
+
+## 2. Prüfsummen prüfen
+  maria-shop.sicherung: OK
+  postgres-shop.sicherung: OK
+  sqlite-app.sicherung: OK
+
+## 3. Zweiter Lauf während der erste noch läuft: die Sperre verhindert den doppelten Start
+läuft bereits
+Rückgabecode: 2
+
+## 4. Fehlerfall: MariaDB ist nicht erreichbar (Socket falsch)
+Rückgabecode: 1
+OK      postgres-shop
+FEHLER  maria-shop
+OK      sqlite-app
+GESAMT  Fehler
+Meldung:
+Sicherung maria-shop fehlgeschlagen
+Die fehlgeschlagene Sicherung hinterlässt keine unvollständige Datei: 0 .tmp-Dateien
+Die letzte gute Sicherung von maria-shop bleibt erhalten: 1
+
+## 5. Einplanung (Text, nicht ausgeführt)
+# Beispielzeile für cron (täglich 02:30), Pfade erfunden:
+30 2 * * * /opt/sicherung/sichern.sh /srv/sicherung >> /var/log/sicherung.log 2>&1
+Zusätzlich: Meldung bei Rückgabecode ungleich 0 und regelmäßiger Wiederherstellungstest (Modul 4).

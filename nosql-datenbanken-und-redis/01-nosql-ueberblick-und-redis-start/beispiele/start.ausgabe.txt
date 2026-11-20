@@ -1,0 +1,34 @@
+
+## 1. Version und Erreichbarkeit
+Version: 7.0.15
+$ redis-cli -p 6399 ping
+PONG
+redis_mode:standalone
+tcp_port:6399
+
+## 2. Schlüssel setzen und lesen (Schlüssel-Wert-Modell)
+> set kunde:1:name Anna Beispiel
+OK
+> get kunde:1:name
+"Anna Beispiel"
+> set kunde:2:name Ben Beispiel
+OK
+
+## 3. Schlüsselnamen mit Doppelpunkt als Konvention; Suche mit SCAN statt KEYS im Betrieb
+> --scan --pattern kunde:*
+kunde:1:name
+kunde:2:name
+Anzahl Schlüssel: 2
+
+## 4. Schlüssel löschen und prüfen
+> del kunde:2:name
+(integer) 1
+> exists kunde:2:name
+(integer) 0
+> exists kunde:1:name
+(integer) 1
+
+## 5. Gegenüberstellung (Text, aus Fachwissen)
+Relational  : Tabellen, feste Spalten, SQL, Verknüpfungen
+Schlüssel-Wert: Wert zu einem Schlüssel, sehr schnell, wenig Abfragemöglichkeiten (Redis)
+Dokument    : verschachtelte Dokumente, flexible Felder (zum Beispiel MongoDB, Modul 7)

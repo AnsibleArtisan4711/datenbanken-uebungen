@@ -1,0 +1,41 @@
+
+## 1. Schlüssel mit Ablauf setzen (SET ... EX) und TTL lesen
+> set sitzung:abc benutzer=anna ex 2
+OK
+TTL liegt zwischen 1 und 2 Sekunden: ja
+
+## 2. Ohne Ablauf: TTL = -1; nicht vorhanden: TTL = -2
+> set dauerhaft 1
+OK
+> ttl dauerhaft
+(integer) -1
+> ttl gibtesnicht
+(integer) -2
+
+## 3. Ablauf nachträglich setzen und wieder aufheben (EXPIRE, PERSIST)
+> expire dauerhaft 100
+(integer) 1
+TTL liegt zwischen 1 und 100: ja
+> persist dauerhaft
+(integer) 1
+> ttl dauerhaft
+(integer) -1
+
+## 4. Warten bis zum Ablauf der Sitzung (2,5 Sekunden)
+> get sitzung:abc
+(nil)
+> exists sitzung:abc
+(integer) 0
+
+## 5. Zwischenspeicher-Muster (Cache-Aside) im Bash-Modell
+Fehlt    preis: berechne neu (langsam) und speichere für 60 s
+Treffer  preis = wert-preis
+Fehlt    lager: berechne neu (langsam) und speichere für 60 s
+
+## 6. Ablauf bei Änderung: SET ohne EX löscht den Ablauf
+> set sitzung:x 1 ex 100
+OK
+> set sitzung:x 2
+OK
+> ttl sitzung:x
+(integer) -1

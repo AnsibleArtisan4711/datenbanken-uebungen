@@ -1,0 +1,26 @@
+
+## 1. Ausgangslage
+kunden=500
+bestellungen=1500
+
+## 2. Vollsicherung (Format custom)
+Sicherungsdatei vorhanden und nicht leer
+
+## 3. Nach der Sicherung kommen 40 neue Bestellungen dazu
+INSERT 0 40
+bestellungen=1540
+
+## 4. Unfall: Datenbank wird gelöscht
+DROP DATABASE
+Datenbank shop vorhanden (0=nein): 0
+
+## 5. Wiederherstellung und Zeitmessung
+kunden=500
+bestellungen=1500
+
+## 6. Ergebnis: RPO und RTO
+Bestellungen vor dem Unfall: 1540, nach der Wiederherstellung: 1500, verloren: 40 (RPO-Folge)
+Gemessene Wiederherstellungsdauer (RTO) kleiner als 60 Sekunden: ja
+Die genaue Sekundenzahl schwankt von Lauf zu Lauf und wird deshalb nicht festgehalten.
+
+## 7. Verbesserung (Text): Sicherung öfter oder fortlaufendes Archiv (siehe P31, PITR)

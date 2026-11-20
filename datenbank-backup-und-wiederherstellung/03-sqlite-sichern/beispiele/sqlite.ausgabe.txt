@@ -1,0 +1,25 @@
+
+## 1. Beispieldatenbank (WAL-Modus, 2000 Zeilen)
+wal
+Zeilen: 2000
+app.db 
+
+## 2. Sichere Methode 1: .backup (Online-Sicherung über die SQLite-Schnittstelle)
+2000 ok 
+
+## 3. Sichere Methode 2: VACUUM INTO (kompakte Kopie)
+2000 ok 
+
+## 4. Unsichere Methode: Hauptdatei kopieren, während eine andere Verbindung geöffnet ist und Änderungen nur im WAL stehen
+Dateien app.db* während der offenen Verbindung: app.db, app.db-shm, app.db-wal
+Zeilen in der Datenbank: 2100
+Zeilen in der kopierten Hauptdatei: 2000
+
+## 5. Beschädigung erkennen: Prüfsumme und integrity_check
+Prüfsumme gleich (Änderung in der Mitte): nein
+integrity_check (Änderung in der Mitte): ok
+integrity_check (Änderung am Dateikopf): Error: in prepare, file is not a database (26)
+
+## 6. Hinweis (Text)
+Eine Prüfsumme erkennt jede Änderung; integrity_check prüft die Struktur, nicht jeden Dateninhalt.
+Für Sicherungen im laufenden Betrieb .backup oder VACUUM INTO verwenden; reines Kopieren nur bei geschlossener Datenbank oder mit allen zugehörigen Dateien.

@@ -1,0 +1,38 @@
+
+## 1. Transaktion mit MULTI/EXEC: alle Befehle werden gemeinsam ausgeführt
+OK
+QUEUED
+QUEUED
+1) (integer) 70
+2) (integer) 30
+konto:a=70 konto:b=30
+
+## 2. Fehler in der Transaktion: unbekannter Befehl verwirft alles (beim Einreihen erkannt)
+OK
+QUEUED
+(error) ERR unknown command 'FALSCHER_BEFEHL', with args beginning with: 
+(error) EXECABORT Transaction discarded because of previous errors.
+konto:a=70
+
+## 3. Pub/Sub: eine Nachricht an einen wartenden Abonnenten
+Empfänger erreicht: 1
+subscribe kanal1 1 message kanal1 Beispiel-Nachricht 
+
+## 4. Speichergrenze mit Verdrängung (maxmemory 2mb, allkeys-lru): ältere Schlüssel werden entfernt
+Geschriebene Schlüssel: 50, vorhanden: weniger als 50; verdrängt laut INFO: ja
+
+## 5. Ohne Verdrängung (noeviction) werden Schreibvorgänge abgelehnt
+OOM-Fehler bei weiterem Schreiben: 1
+
+## 6. Überwachung: Speicher und langsame Befehle
+maxmemory_human:2.00M
+maxmemory_policy:noeviction
+Einträge im Slowlog (Schwelle 0 µs): mindestens 1
+
+## 7. Abschlussprojekt (Aufgabenliste)
+1 Sitzungsspeicher entwerfen: Schlüsselnamen, Hash je Sitzung, Ablauf (Modul 3)
+2 Persistenz wählen und begründen (Modul 4)
+3 Replikat und Übernahme von Hand testen (Modul 5)
+4 Zugriff mit Kennwort und ACL-Benutzern absichern (Modul 6)
+5 Speichergrenze und Verdrängung festlegen
+6 Bericht: was getestet, was nicht (zum Beispiel TLS, Sentinel, Cluster)

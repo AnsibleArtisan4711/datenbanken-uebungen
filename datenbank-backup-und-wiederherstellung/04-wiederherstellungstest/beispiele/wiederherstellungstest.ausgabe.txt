@@ -1,0 +1,33 @@
+
+## 1. PostgreSQL: Sicherung der Quelle (Port 5481), Einspielen in die Zielinstanz (Port 5482)
+pg_restore Rückgabecode: 0
+Quelle : 2400|115572.00
+Ziel   : 2400|115572.00
+Prüfsumme der Zeilen gleich: ja
+
+## 2. Ein einzelner Wert wird in der Quelle geändert: die Prüfsumme bemerkt es, Anzahl und Summe nicht unbedingt
+Anzahl und Summe gleich: ja
+Prüfsumme gleich: nein
+
+## 3. Beschädigte Sicherung: Datei abgeschnitten
+pg_restore -l Rückgabecode: 0
+pg_restore ins Ziel Rückgabecode ungleich 0: ja
+Das Auflisten mit pg_restore -l erkannte den Schaden in diesem Lauf nicht; erst das Einspielen in eine Testinstanz schlug fehl.
+
+## 4. MariaDB: Dump einspielen und vergleichen
+Rückgabecode: 0
+Quelle : 2400|115572.00
+Ziel   : 2400|115572.00
+Prüfsumme der Zeilen gleich: ja
+
+## 5. Abgeschnittener MariaDB-Dump: Prüfung der letzten Zeile
+Letzte Zeile des vollständigen Dumps: -- Dump completed 
+Letzte Zeile des abgeschnittenen Dumps: (mitten in einer Anweisung abgebrochen)
+Abschlusszeile "Dump completed" vorhanden (vollständig): 1; (abgeschnitten): 0
+
+## 6. Ablauf eines Wiederherstellungstests (Text)
+1 Sicherung auswählen (zufällig oder die älteste noch gültige)
+2 In einer getrennten Testinstanz einspielen, nie in die Produktion
+3 Zeilenzahlen, Summen und Prüfsumme mit der Quelle vergleichen (bei bewegter Quelle: Zeitpunkt der Sicherung beachten)
+4 Dauer messen und mit dem RTO vergleichen
+5 Ergebnis dokumentieren, Testinstanz entfernen

@@ -1,0 +1,22 @@
+
+## 1. Bestand beschreiben (Modell, Orte erfunden)
+daten,kopie,medium,ort
+shop-db,original,SSD-Server,rechenzentrum-a
+shop-db,sicherung-1,NAS,rechenzentrum-a
+shop-db,sicherung-2,Objektspeicher,anbieter-extern
+buchhaltung,original,SSD-Server,rechenzentrum-a
+buchhaltung,sicherung-1,NAS,rechenzentrum-a
+
+## 2. 3-2-1 prüfen: mindestens 3 Kopien, 2 Medien, 1 anderer Ort
+shop-db      Kopien=3 Medien=3 Orte=2 -> erfüllt
+buchhaltung  Kopien=2 Medien=2 Orte=1 -> NICHT erfüllt
+
+## 3. Schreibgeschützte Kopie (Modell): Dateirecht chmod 444
+überschrieben (als root möglich)
+Hinweis: root umgeht Dateirechte. Eine Objektsperre beim Anbieter oder eine getrennte Zugangskennung leistet das, was chmod nicht kann (nicht ausgeführt).
+
+## 4. Angriffsmodell: Wer darf Sicherungen löschen?
+Rolle              Sicherung schreiben  Sicherung löschen
+Sicherungskonto    ja                   nein (nur Anbieterseitige Aufbewahrungsfrist)
+Datenbankadmin     nein                 nein
+Sicherungsleitung  nein                 ja, mit zweiter Person

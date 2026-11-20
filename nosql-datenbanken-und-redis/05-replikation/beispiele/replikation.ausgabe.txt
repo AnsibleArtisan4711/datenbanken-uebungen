@@ -1,0 +1,38 @@
+
+## 1. Replikat mit der Hauptinstanz verbinden (die Hauptinstanz startet mit repl-diskless-sync-delay 0, sonst war die Verbindung im Test nach 5 Sekunden noch nicht aufgebaut)
+> replicaof 127.0.0.1 6399
+OK
+Verbindung: up
+role:slave
+master_link_status:up
+role:master
+connected_slaves:1
+
+## 2. Schreiben an der Hauptinstanz, Lesen am Replikat
+> set bestellung:1 offen
+OK
+> get bestellung:1
+"offen"
+
+## 3. Das Replikat ist schreibgeschützt
+> set bestellung:2 offen
+(error) READONLY You can't write against a read only replica.
+
+## 4. Hauptinstanz fällt aus (Prozess beendet), das Replikat behält die Daten
+> get bestellung:1
+"offen"
+master_link_status:down
+
+## 5. Übernahme von Hand: Replikat wird Haupt (REPLICAOF NO ONE)
+> replicaof no one
+OK
+role:master
+> set bestellung:2 offen
+OK
+> get bestellung:2
+"offen"
+
+## 6. Grenzen (Text)
+Die Replikation arbeitet asynchron: Schreibvorgänge, die das Replikat noch nicht erreicht haben, können bei einem Ausfall fehlen.
+Die Übernahme von Hand genügt nicht für den Betrieb; automatische Übernahme (Sentinel, Cluster) wurde nicht ausgeführt.
+Replikation ist keine Datensicherung: gelöschte Daten werden auf das Replikat übertragen.
